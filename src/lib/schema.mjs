@@ -23,7 +23,7 @@ export function graph(page, { product, faq, breadcrumbs, type } = {}) {
       ],
       offers: { '@type': 'AggregateOffer', priceCurrency: 'RUB', lowPrice: Math.min(...prices), highPrice: Math.max(...prices), offerCount: 3, availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder', seller: { '@id': ORG } } });
   }
-  if (d.type === 'contact') for (const s of showrooms) g.push({ '@type': 'FurnitureStore', '@id': `${SITE.canonicalOrigin}/kontakty/#${s.slug}`, name: `SIMMETRIKA, ${s.name}`, address: { '@type': 'PostalAddress', streetAddress: s.address, addressCountry: 'RU' }, telephone: s.phone, openingHours: `Mo-Su ${s.hours.replace('–', '-')}`, parentOrganization: { '@id': ORG } });
+  if (d.type === 'contact') for (const s of showrooms) g.push({ '@type': 'FurnitureStore', '@id': `${SITE.canonicalOrigin}/kontakty/#${s.slug}`, name: `SIMMETRIKA, ${s.name}`, address: { '@type': 'PostalAddress', streetAddress: s.address, addressCountry: 'RU' }, ...(s.lat ? { geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lon } } : {}), telephone: s.phone, openingHours: `Mo-Su ${s.hours.replace('–', '-')}`, parentOrganization: { '@id': ORG } });
   if (faq?.length) g.push({ '@type': 'FAQPage', mainEntity: faq.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })) });
   return { '@context': 'https://schema.org', '@graph': g };
 }

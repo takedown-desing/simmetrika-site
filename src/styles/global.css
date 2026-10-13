@@ -404,3 +404,21 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .scheme-svg svg, .map svg { overflow: hidden; }
 .btn { white-space: normal; text-align: center; line-height: 1.25; height: auto; min-height: 56px; padding-block: 12px; }
 .btn-sm { min-height: 44px; padding-block: 8px; }
+
+/* счётчик на плашках разделов: горизонтально над плашкой */
+.tile-n { left: 40px; top: -30px; transform: none; font-size: 15px; color: #888; letter-spacing: .02em; }
+@media (max-width: 760px) { .tile-n { left: 24px; top: -26px; } }
+
+/* интерактивная Яндекс.Карта */
+.ymap { padding: 0; background: none; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; }
+.ymap-box { position: relative; min-height: 420px; background: var(--c-photo); }
+.ymap-box iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.ymap-legend { list-style: none; counter-reset: pt; margin: 0; padding: 0; display: grid; gap: 8px; align-content: start; }
+.ymap-legend li { counter-increment: pt; margin: 0; }
+.ymap-legend a { display: grid; grid-template-columns: 30px 1fr; column-gap: 12px; padding: 14px 16px; background: var(--c-panel); text-decoration: none !important; color: var(--c-ink) !important; }
+.ymap-legend a::before { content: counter(pt); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; background: var(--c-accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.ymap-legend a:hover b { color: var(--c-accent); }
+.ymap-legend b { font-weight: 500; font-size: 15px; } .ymap-legend span { font-size: 13px; color: var(--c-ink-2); }
+.band-panel .ymap-legend a { background: #fff; }
+@media (max-width: 900px) { .ymap { grid-template-columns: 1fr; } .ymap-box { min-height: 340px; } }
+.tiles { padding-top: 30px; }

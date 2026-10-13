@@ -96,10 +96,20 @@ export function showroomsHtml(mode = 'cards') {
     <p class="show-a">${esc(s.address)}</p>
     <p class="show-h">Ежедневно ${esc(s.hours)}</p>
     <p class="show-p"><a href="${phoneHref(s.phone)}">${esc(s.phone)}</a></p>
-    <p class="show-m"><a href="https://yandex.ru/maps/?text=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Открыть на карте</a></p>
+    <p class="show-m"><a href="${s.lat ? ymapPoint(s) : `https://yandex.ru/maps/?text=${encodeURIComponent(s.address)}`}" target="_blank" rel="noopener">Открыть на Яндекс.Картах</a></p>
   </article>`).join('')}</div>`;
 }
+// интерактивная Яндекс.Карта (виджет без API-ключа), метки пронумерованы как в списке шоурумов
+const ymapPoint = (s) => `https://yandex.ru/maps/?pt=${s.lon},${s.lat}&z=16&l=map`;
 export function mapHtml() {
+  const pt = showrooms.map((s, i) => `${s.lon},${s.lat},pm2rdl${i + 1}`).join('~');
+  const src = `https://yandex.ru/map-widget/v1/?ll=37.55,55.75&z=9&pt=${encodeURIComponent(pt).replace(/%2C/g, ',').replace(/%7E/g, '~')}`;
+  return `<figure class="map ymap">
+    <div class="ymap-box"><iframe src="${src}" title="Шоурумы SIMMETRIKA на Яндекс.Карте" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <ol class="ymap-legend">${showrooms.map((s) => `<li><a href="${ymapPoint(s)}" target="_blank" rel="noopener"><b>${esc(s.name)}</b><span>${esc(s.address)}</span></a></li>`).join('')}</ol>
+  </figure>`;
+}
+export function mapSvg() {
   const pts = [[140, 70], [255, 120], [185, 55], [95, 175], [230, 205]];
   return `<figure class="map"><svg viewBox="0 0 360 260" role="img" aria-label="Схема расположения шоурумов относительно МКАД">
     <ellipse cx="180" cy="130" rx="120" ry="95" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/>
@@ -194,7 +204,7 @@ export function schemeSvg(kind = '', attrs = {}) {
     const max = Math.max(...list.map((p) => p.length_cm));
     return `<svg viewBox="0 0 420 ${list.length * 24 + 10}" role="img" aria-label="Длина моделей, см">${list.map((p, i) => `<text x="0" y="${i * 24 + 16}" font-size="11" fill="${C}">${esc(p.name)}${p.category === 'uglovye-divany' ? ' угл.' : p.category === 'modulnye-divany' ? ' мод.' : ''}</text><rect x="110" y="${i * 24 + 5}" width="${(p.length_cm / max) * 260}" height="14" fill="${p.category === 'uglovye-divany' ? 'var(--c-accent)' : '#8E9096'}" opacity=".75"/><text x="${115 + (p.length_cm / max) * 260}" y="${i * 24 + 16}" font-size="11" fill="${C}">${p.length_cm}</text>`).join('')}</svg>`;
   }
-  if (kind === 'delivery-zones' || kind === 'showrooms-mkad') return mapHtml().replace(/<\/?figure[^>]*>|<figcaption>.*<\/figcaption>/g, '');
+  if (kind === 'delivery-zones' || kind === 'showrooms-mkad') return mapSvg().replace(/<\/?figure[^>]*>|<figcaption>.*<\/figcaption>/g, '');
   if (kind === 'modules') return `<svg viewBox="0 0 400 130" role="img" aria-label="Модули модульной системы">${sofa(10, 20, 80, 50)}${sofa(95, 20, 100, 50)}${sofa(200, 20, 50, 50)}${sofa(200, 70, 50, 50)}${sofa(300, 40, 80, 80)}<g font-size="11" fill="${C}"><text x="50" y="90" text-anchor="middle">секция</text><text x="145" y="90" text-anchor="middle">секция</text><text x="225" y="128" text-anchor="middle">угол</text><text x="340" y="128" text-anchor="middle">оттоманка</text></g></svg>`;
   if (kind === 'custom-dimensions' || kind === 'room-layout') return `<svg viewBox="0 0 400 150" role="img" aria-label="Размеры, которые можно изменить">${sofa(60, 40, 260, 60)}<path d="M60 120h260M60 115v10M320 115v10" stroke="var(--c-accent)" stroke-width="2"/><text x="190" y="140" text-anchor="middle" font-size="12" fill="${C}">длина ±30 см</text><path d="M340 40v60M335 40h10M335 100h10" stroke="var(--c-accent)" stroke-width="2"/><text x="350" y="75" font-size="12" fill="${C}">глубина ±10</text></svg>`;
   return '';
