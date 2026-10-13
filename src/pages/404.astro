@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { byId } from '../lib/content.mjs';
+import { u, NAV } from '../lib/site.mjs';
+import { tiles, formHtml } from '../lib/render.mjs';
+import { settings } from '../lib/catalog.mjs';
+const p = byId()['404'];
+const d = p?.data || { h1: 'Страница не найдена', title: 'Страница не найдена | SIMMETRIKA' };
+const lead = (p?.body || '').split('\n').find((l) => l.trim() && !l.startsWith(':::') && !l.startsWith('#')) || 'Такой страницы нет или она переехала.';
+---
+<Base data={{ ...d, url: undefined }} noindex>
+  <div class="phead"><div class="wrap"><h1>{d.h1}</h1><p class="lede">{lead.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')}</p>
+    <p class="phead-btns"><a class="btn btn-accent" href={u('/catalog/')}>Перейти в каталог</a><a class="btn btn-line" href={'tel:' + settings.phone_main.replace(/[^\d+]/g, '')}>{settings.phone_main}</a></p></div></div>
+  <div class="wrap prose" style="padding-bottom:64px"><Fragment set:html={tiles(['/catalog/pryamye-divany/', '/catalog/uglovye-divany/', '/catalog/modulnye-divany/', '/catalog/divany-krovati/', '/sale/'])} /><Fragment set:html={formHtml('callback')} /></div>
+</Base>

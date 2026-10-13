@@ -1,0 +1,150 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Faq from '../components/Faq.astro';
+import Related from '../components/Related.astro';
+import { loadPages } from '../lib/content.mjs';
+import { renderMd } from '../lib/md.mjs';
+import { graph } from '../lib/schema.mjs';
+import { u } from '../lib/site.mjs';
+import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
+import { picture, productCard, showroomsHtml, cartPayload, esc } from '../lib/render.mjs';
+import { cardifySections as cardify } from '../lib/layout.mjs';
+
+export function getStaticPaths() {
+  const SKIP = new Set(['ui', 'error']);
+  return loadPages()
+    .filter((p) => p.data.url && p.data.url !== '/' && !String(p.data.url).includes('{') && !SKIP.has(p.data.type))
+    .map((p) => ({ params: { slug: p.data.url.replace(/^\/|\/$/g, '') }, props: { page: p } }));
+}
+const { page } = Astro.props;
+const d = page.data;
+const type = d.type;
+const isProduct = type === 'product';
+const isCart = type === 'cart';
+const p = isProduct ? products.find((x) => x.url === d.url) : null;
+const crumbs = p
+  ? [{ name: 'Главная', url: '/' }, { name: 'Каталог', url: '/catalog/' }, { name: CATEGORY[p.category].name, url: CATEGORY[p.category].url }, { name: d.h1, url: d.url }]
+  : d.breadcrumbs || [{ name: 'Главная', url: '/' }, { name: d.h1, url: d.url }];
+
+// товар
+let descHtml = '', similar = [], family = [];
+if (p) {
+  descHtml = renderMd(d.description_md || page.body);
+  similar = select(`category=${p.category}`).filter((x) => x.id !== p.id).slice(0, 3);
+  family = products.filter((x) => x.model_family === p.model_family && x.id !== p.id);
+}
+const bodyHtml = !isProduct && !isCart ? cardify(renderMd(page.body)) : '';
+const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
+const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
+const ui = d.ui_texts || {};
+const fab = Object.values(MATERIAL);
+---
+<Base data={d} schema={schema} ogImage={og} noindex={isCart} bodyClass={isProduct ? 'has-mbar' : ''}>
+{isProduct && p ? (
+  <>
+    <div class="wrap" style="padding-top:24px"><ol class="crumbs">{crumbs.map((c, i) => <li>{i < crumbs.length - 1 ? <a href={u(c.url)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}</ol></div>
+    <div class="wrap pp" data-product={JSON.stringify({ id: p.id, name: p.h1, url: p.url, base: p.price_from, k: Object.fromEntries(fab.map((f) => [f.material, f.price_k])), img: img(p.photos?.[0])?.s || '', sides: !!p.sides })}>
+      <div class="gal">
+        <div class="gal-main" data-zoom>{p.photos?.[0] && <Fragment set:html={picture(p.photos[0], d.alt_template?.replace('{n}', '1') || p.h1, { eager: true, sizes: '(min-width: 900px) 640px, 100vw' })} />}</div>
+        {p.photos?.length > 1 && <div class="gal-th" role="list">{p.photos.map((ph, i) => <button type="button" role="listitem" data-thumb={u(img(ph)?.l || '')} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Фото ${i + 1}`}><Fragment set:html={picture(ph, '', { sizes: '92px' })} /></button>)}</div>}
+      </div>
+      <div class="buy">
+        <p class="eyebrow">{CATEGORY[p.category]?.name}</p>
+        <h1>{d.h1}</h1>
+        <p class="buy-sub">{sizeStr(p)}{p.sleeping ? `, спальное место ${p.sleeping.w}×${p.sleeping.l} см` : ', без спального места'} · {p.mechanism !== 'none' ? `механизм ${p.mechanism_name}` : 'нераскладной'}</p>
+        <p class="buy-price"><span data-price>{rub(variantPrice(p, 'rogozhka'))}</span> <small>ориентировочно, в выбранной ткани</small></p>
+        <p class="buy-note">Финальную цену с учётом ткани, размера и доставки согласует менеджер.</p>
+        <div class="opt"><p class="opt-t">Материал обивки</p><div class="seg" data-material>{fab.map((f, i) => <button type="button" data-v={f.material} aria-pressed={i === 1 ? 'true' : 'false'} data-colors={f.colors.join(',')}>{f.name}</button>)}</div></div>
+        <div class="opt"><p class="opt-t">Цвет: <span data-color-name>{COLOR_NAME[MATERIAL.rogozhka.colors[0]]}</span></p><div class="colors" data-colors-box>{MATERIAL.rogozhka.colors.map((c, i) => <button type="button" style={`--sw:${COLOR_HEX[c]}`} data-v={c} data-n={COLOR_NAME[c]} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={COLOR_NAME[c]}></button>)}</div></div>
+        {p.sides && <div class="opt"><p class="opt-t">Сторона угла (стоя лицом к дивану)</p><div class="seg" data-side><button type="button" data-v="left" aria-pressed="true">Левый</button><button type="button" data-v="right" aria-pressed="false">Правый</button></div></div>}
+        <p class={`stock ${p.in_stock ? '' : 'is-order'}`}>{p.in_stock ? `В наличии: ${MATERIAL[p.in_stock.material].name.toLowerCase()}, ${COLOR_NAME[p.in_stock.color]}. Доставка ${settings.delivery.in_stock_days} дня` : `Под заказ, изготовление ${settings.delivery.made_to_order_days} дней`}</p>
+        <div class="buy-btns"><button type="button" class="btn btn-accent" data-add-product>Добавить в заявку</button><button type="button" class="btn btn-line" data-oneclick>Заказать в один клик</button></div>
+        {p.samples?.length > 0 && <p class="blk-note" style="margin-top:18px">Выставочный образец со скидкой {p.samples[0].discount_pct}% стоит в шоуруме {SHOWROOM[p.samples[0].showroom].name}: {rub(p.samples[0].sample_price)} вместо {rub(p.samples[0].old_price)}. <a href={u('/sale/')}>Все образцы</a></p>}
+        <dl class="mini">
+          <div><dt>Габариты, Д×Г×В</dt><dd>{sizeStr(p)}</dd></div>
+          <div><dt>Спальное место</dt><dd>{sleepStr(p)}</dd></div>
+          <div><dt>Механизм</dt><dd>{p.mechanism_name}</dd></div>
+          {p.seat_height_cm && <div><dt>Высота посадки</dt><dd>{p.seat_height_cm} см</dd></div>}
+          <div><dt>Ящик для белья</dt><dd>{p.has_storage ? 'есть' : 'нет'}</dd></div>
+          <div><dt>Гарантия</dt><dd>{p.warranty_months} месяцев</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="wrap prose">
+      <section class="sec"><h2>Описание</h2>
+        {d.features?.length > 0 && <ul class="feat">{d.features.map((f) => <li>{typeof f === 'string' ? f : `${f.title ?? ''} ${f.text ?? ''}`}</li>)}</ul>}
+        <Fragment set:html={descHtml} />
+      </section>
+      <section class="sec"><h2>Характеристики</h2>
+        <div class="tbl"><table><tbody>
+          <tr><th>Категория</th><td>{CATEGORY[p.category]?.name}</td></tr>
+          <tr><th>Габариты (Д×Г×В)</th><td>{sizeStr(p)}</td></tr>
+          <tr><th>Спальное место</th><td>{sleepStr(p)}</td></tr>
+          <tr><th>Механизм трансформации</th><td>{p.mechanism_name}</td></tr>
+          {p.sides && <tr><th>Сторона угла</th><td>левая или правая, цена одинаковая</td></tr>}
+          {p.modules && <tr><th>Модули</th><td>{p.modules.join(', ')}</td></tr>}
+          <tr><th>Конструкция</th><td>{p.construction.replace(/\s*\[.*?\]/, '')}</td></tr>
+          <tr><th>Материалы обивки</th><td>велюр, рогожка, жаккард</td></tr>
+          <tr><th>Изготовление под заказ</th><td>{settings.delivery.made_to_order_days} дней</td></tr>
+          <tr><th>Гарантия</th><td>{p.warranty_months} месяцев</td></tr>
+        </tbody></table></div>
+      </section>
+      {family.length > 0 && <section class="sec"><h2>Эта модель в других исполнениях</h2><div class="pgrid">{family.map((x) => <Fragment set:html={productCard(x)} />)}</div></section>}
+      <section class="sec"><h2>Доставка и где посмотреть</h2>
+        <p>Доставка по Москве в пределах МКАД {rub(settings.delivery.moscow_mkad_rub)}, за МКАД плюс {settings.delivery.outside_mkad_per_km_rub} ₽ за километр, самовывоз из шоурума бесплатно. {p.category === 'pryamye-divany' ? '' : 'Сборка включена. '}Подробнее на странице <a href={u('/dostavka/')}>доставка и сборка</a>. Нужен другой размер: <a href={u('/na-zakaz/')}>диваны на заказ</a>.</p>
+        <Fragment set:html={showroomsHtml('list')} />
+      </section>
+      {similar.length > 0 && <section class="sec"><h2>Похожие модели</h2><div class="pgrid">{similar.map((x) => <Fragment set:html={productCard(x)} />)}</div></section>}
+    </div>
+    <Faq items={d.faq} title={d.faq_title || `Вопросы о модели ${p.name}`} />
+    <div class="mbar"><button type="button" class="btn btn-accent" data-add-product>В заявку</button><button type="button" class="btn btn-line" data-oneclick>В один клик</button></div>
+  </>
+) : isCart ? (
+  d.page_id === 'zayavka' ? (
+    <>
+      <PageHead data={{ h1: d.h1, lede: ui.hero?.lede || 'Выбранные модели. Отправьте заявку, менеджер перезвонит и согласует ткань, цену и срок.' }} crumbs={[{ name: 'Главная', url: '/' }, { name: d.h1, url: d.url }]} />
+      <div class="wrap cart" data-cart>
+        <div>
+          <div class="cart-list" data-cart-list></div>
+          <div class="empty" data-cart-empty hidden><p class="empty-t">В заявке пока ничего нет</p><p>Выберите диван в каталоге и нажмите «В заявку».</p><p class="phead-btns" style="justify-content:center"><a class="btn btn-accent" href={u('/catalog/')}>Перейти в каталог</a><a class="btn btn-line" href={u('/catalog/v-nalichii/')}>Диваны в наличии</a></p></div>
+        </div>
+        <aside class="cart-sum" data-cart-sum>
+          <p>Позиций: <b data-cart-count>0</b></p>
+          <p class="tot" data-cart-total>0 ₽</p>
+          <p class="buy-note">Сумма ориентировочная. Финальную стоимость с учётом ткани, размера и доставки согласует менеджер.</p>
+          <form class="lead-form" data-form="cart" novalidate style="padding:0;background:none;margin:18px 0 0">
+            <div class="fld-row" style="grid-template-columns:1fr">
+              <label class="fld"><span>Имя</span><input name="name" autocomplete="name"></label>
+              <label class="fld"><span>Телефон *</span><input name="phone" type="tel" required autocomplete="tel" data-mask placeholder="+7 (___) ___-__-__"></label>
+              <label class="fld"><span>Email</span><input name="email" type="email" autocomplete="email"></label>
+              <label class="fld"><span>Удобный способ связи</span><select name="channel"><option>Звонок</option><option>WhatsApp</option><option>Telegram</option></select></label>
+              <label class="fld"><span>Комментарий</span><textarea name="comment" rows="3"></textarea></label>
+            </div>
+            <label class="fld-check"><input type="checkbox" name="consent" required> Согласен на обработку персональных данных по <a href={u('/privacy/#soglasie')}>политике конфиденциальности</a></label>
+            <p class="lf-err" data-err role="alert"></p>
+            <button class="btn btn-accent" type="submit">Отправить заявку</button>
+          </form>
+        </aside>
+      </div>
+      <Faq items={d.faq} title="Вопросы о заявке" />
+    </>
+  ) : (
+    <>
+      <PageHead data={{ h1: d.h1, lede: `Заявка принята. Мы ${settings.callback_promise}.` }} crumbs={[]} />
+      <div class="wrap prose" style="padding-block:24px 64px" data-thanks>
+        <p class="lede">Номер заявки: <b data-lead-no>…</b></p>
+        <div class="ig ig-steps"><ol><li><p><b>Звонок менеджера.</b> Уточним ткань, цвет, сторону угла и размер.</p></li><li><p><b>Цена и срок.</b> Назовём точную стоимость и дату изготовления или доставки.</p></li><li><p><b>Доставка или самовывоз.</b> Согласуем день и адрес, оплата при получении.</p></li></ol></div>
+        <p class="phead-btns"><a class="btn btn-accent" href={u('/catalog/')}>Вернуться в каталог</a><a class="btn btn-line" href={u('/kontakty/')}>Шоурумы</a></p>
+      </div>
+    </>
+  )
+) : (
+  <>
+    <PageHead data={d} crumbs={crumbs} />
+    <div class="wrap prose prose-wrap" set:html={bodyHtml} />
+    <Faq items={d.faq} title={d.faq_title} />
+    <Related items={d.related} />
+  </>
+)}
+</Base>

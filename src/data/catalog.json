@@ -1,0 +1,1009 @@
+{
+ "_note": "Рабочие данные каталога v1 (2026-10-13). Все значения, кроме названий моделей, механизмов и габаритов со старого сайта, являются допущениями из drafts/_CONTEXT.md и QUESTIONS.md. Источник правды для текстов и вёрстки до ответов клиента.",
+ "assumptions": [
+  "Q-01 цены и коэффициенты тканей",
+  "Q-02 наличие и сроки",
+  "Q-04 привязка габаритов к моделям",
+  "Q-06 ткани и цвета",
+  "Q-15/Q-29 привязка фото",
+  "Q-17 has_storage",
+  "Q-26 образцы",
+  "Q-33 любая ткань доступна любой модели"
+ ],
+ "categories": [
+  {
+   "slug": "pryamye-divany",
+   "name": "Прямые диваны",
+   "h1": "Прямые диваны",
+   "url": "/catalog/pryamye-divany/"
+  },
+  {
+   "slug": "uglovye-divany",
+   "name": "Угловые диваны",
+   "h1": "Угловые диваны",
+   "url": "/catalog/uglovye-divany/"
+  },
+  {
+   "slug": "modulnye-divany",
+   "name": "Модульные диваны и системы",
+   "h1": "Модульные диваны и системы",
+   "url": "/catalog/modulnye-divany/"
+  }
+ ],
+ "mechanisms": {
+  "none": "без механизма",
+  "pantograf": "пантограф",
+  "venetsiya": "венеция",
+  "vykatnoy": "выкатной"
+ },
+ "colors": {
+  "seryy": "серый",
+  "bezhevyy": "бежевый",
+  "zelenyy": "зелёный",
+  "siniy": "синий",
+  "belyy": "белый",
+  "korichnevyy": "коричневый",
+  "zheltyy": "жёлтый",
+  "terrakot": "терракотовый",
+  "bordovyy": "бордовый",
+  "rozovyy": "розовый"
+ },
+ "fabrics": [
+  {
+   "material": "velyur",
+   "name": "Велюр",
+   "collection": "Velutto",
+   "price_k": 1.05,
+   "colors": [
+    "seryy",
+    "bezhevyy",
+    "zelenyy",
+    "siniy",
+    "zheltyy",
+    "terrakot",
+    "bordovyy",
+    "rozovyy",
+    "korichnevyy"
+   ],
+   "props": "мягкий, антикоготь, легко чистится"
+  },
+  {
+   "material": "rogozhka",
+   "name": "Рогожка",
+   "collection": "Lino",
+   "price_k": 1.0,
+   "colors": [
+    "seryy",
+    "bezhevyy",
+    "belyy",
+    "korichnevyy",
+    "zelenyy",
+    "siniy"
+   ],
+   "props": "износостойкая, фактурная, подходит семьям с детьми"
+  },
+  {
+   "material": "zhakkard",
+   "name": "Жаккард",
+   "collection": "Arte",
+   "price_k": 1.1,
+   "colors": [
+    "bezhevyy",
+    "korichnevyy",
+    "seryy"
+   ],
+   "props": "плотный, с рисунком, устойчив к истиранию"
+  }
+ ],
+ "products": [
+  {
+   "id": "pryamye-divany/edzhio",
+   "category": "pryamye-divany",
+   "slug": "edzhio",
+   "name": "Эджио",
+   "type": "Прямой",
+   "h1": "Прямой диван Эджио",
+   "url": "/catalog/pryamye-divany/edzhio/",
+   "model_family": "edzhio",
+   "length_cm": 235,
+   "depth_cm": 116,
+   "height_cm": 88,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie"
+   ],
+   "price_from": 89000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/06264b4d-6d4a-4c2d-8f46-81d55c8046cd.jpeg",
+    "source/photos/08469ee8-fa14-44ec-8099-1ba77b56bd18.jpeg",
+    "source/photos/ab13c2e7-7bd9-4663-9072-36a95747d4cd.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/kembridzh",
+   "category": "pryamye-divany",
+   "slug": "kembridzh",
+   "name": "Кембридж",
+   "type": "Прямой",
+   "h1": "Прямой диван Кембридж",
+   "url": "/catalog/pryamye-divany/kembridzh/",
+   "model_family": "kembridzh",
+   "length_cm": 240,
+   "depth_cm": 100,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 200
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy"
+   ],
+   "price_from": 95000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "velyur",
+    "color": "seryy"
+   },
+   "sides": null,
+   "photos": [
+    "source/photos/2c22df77-be21-4050-a503-4ee8f4a43dff.jpeg",
+    "source/photos/19a178e8-8a18-4d86-b873-36f88fefaeae.jpeg",
+    "source/photos/155510e9-9471-48b1-a533-2b931c525917.jpeg",
+    "source/photos/3c857c58-fc71-49f0-9815-ff3d7fd3a5be.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/reymond",
+   "category": "pryamye-divany",
+   "slug": "reymond",
+   "name": "Реймонд",
+   "type": "Прямой",
+   "h1": "Прямой диван Реймонд",
+   "url": "/catalog/pryamye-divany/reymond/",
+   "model_family": "reymond",
+   "length_cm": 252,
+   "depth_cm": 100,
+   "height_cm": 80,
+   "seat_height_cm": 43,
+   "sleeping": {
+    "w": 150,
+    "l": 200
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie",
+    "bolshie"
+   ],
+   "price_from": 98000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/6c5205a7-e96a-4b48-a148-243b0e323a11.jpeg",
+    "source/photos/7f5b69b2-8346-42cd-be14-e199413481c5.jpeg",
+    "source/photos/48a85f33-55fb-4995-b9d2-d4ee08a0f1b3.jpeg",
+    "source/photos/f80c827d-e3de-4b52-87ce-134c3b716c57.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "velyur",
+     "color": "terrakot",
+     "showroom": "himki-grand",
+     "discount_pct": 25,
+     "old_price": 102900,
+     "sample_price": 77200
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/teo",
+   "category": "pryamye-divany",
+   "slug": "teo",
+   "name": "ТЭО",
+   "type": "Прямой",
+   "h1": "Прямой диван ТЭО",
+   "url": "/catalog/pryamye-divany/teo/",
+   "model_family": "teo",
+   "length_cm": 240,
+   "depth_cm": 96,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 200
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy"
+   ],
+   "price_from": 85000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/3f991780-2a08-4a1e-b986-e442266de2e4.jpeg",
+    "source/photos/e0a8dad9-cb2a-4e77-a47a-6b47e8a601dc.jpeg",
+    "source/photos/da3229b5-681b-4b64-a6af-191459bbc641.jpeg",
+    "source/photos/3a591781-22be-462d-8dc3-e84a781248c2.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/kloud",
+   "category": "pryamye-divany",
+   "slug": "kloud",
+   "name": "Клоуд",
+   "type": "Прямой",
+   "h1": "Прямой диван Клоуд",
+   "url": "/catalog/pryamye-divany/kloud/",
+   "model_family": "kloud",
+   "length_cm": 202,
+   "depth_cm": 107,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 160,
+    "l": 190
+   },
+   "mechanism": "venetsiya",
+   "mechanism_name": "венеция",
+   "has_sleeping_place": true,
+   "has_storage": false,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy"
+   ],
+   "price_from": 79000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "rogozhka",
+    "color": "bezhevyy"
+   },
+   "sides": null,
+   "photos": [
+    "source/photos/0ae44df5-4f52-4bb4-af4c-774ceff0b3b5.jpeg",
+    "source/photos/ab13c2e7-7bd9-4663-9072-36a95747d4cd.jpeg",
+    "source/photos/6d13c2e0-d65b-453a-921b-2979c5328f7a.jpeg",
+    "source/photos/d23f86de-4e03-4c3b-b730-8cb0e15e319e.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/oksford",
+   "category": "pryamye-divany",
+   "slug": "oksford",
+   "name": "Оксфорд",
+   "type": "Прямой",
+   "h1": "Прямой диван Оксфорд",
+   "url": "/catalog/pryamye-divany/oksford/",
+   "model_family": "oksford",
+   "length_cm": 210,
+   "depth_cm": 107,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 160,
+    "l": 190
+   },
+   "mechanism": "vykatnoy",
+   "mechanism_name": "выкатной",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dizaynerskie"
+   ],
+   "price_from": 72000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "velyur",
+    "color": "zheltyy"
+   },
+   "sides": null,
+   "photos": [
+    "source/photos/a3c7435a-8132-43ed-bc22-798f724353f8.jpeg",
+    "source/photos/a3fdaf34-7f21-4b2b-9b0a-6326f3a3891a.jpeg",
+    "source/photos/fa966e3b-64e5-4985-83fd-c0c66cde8740.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/milano",
+   "category": "pryamye-divany",
+   "slug": "milano",
+   "name": "Милано",
+   "type": "Прямой",
+   "h1": "Прямой диван Милано",
+   "url": "/catalog/pryamye-divany/milano/",
+   "model_family": "milano",
+   "length_cm": 260,
+   "depth_cm": 105,
+   "height_cm": 80,
+   "seat_height_cm": 43,
+   "sleeping": {
+    "w": 150,
+    "l": 215
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie",
+    "bolshie"
+   ],
+   "price_from": 105000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/474bf9ac-4e3e-4a1b-a10a-3f0a80c38438.jpeg",
+    "source/photos/bdab2c3d-efef-4a6d-b879-f230d7c13e99.jpeg",
+    "source/photos/cee3c1f7-1b5e-447b-b3b1-870f667b778b.jpeg",
+    "source/photos/9bc25952-9422-460b-ba8b-a49994e096f0.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "velyur",
+     "color": "terrakot",
+     "showroom": "tvoy-dom",
+     "discount_pct": 20,
+     "old_price": 110250,
+     "sample_price": 88200
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "pryamye-divany/bombey",
+   "category": "pryamye-divany",
+   "slug": "bombey",
+   "name": "Бомбей",
+   "type": "Прямой",
+   "h1": "Прямой диван Бомбей",
+   "url": "/catalog/pryamye-divany/bombey/",
+   "model_family": "bombey",
+   "length_cm": 230,
+   "depth_cm": 105,
+   "height_cm": 85,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": false,
+   "tags": [
+    "dizaynerskie"
+   ],
+   "price_from": 92000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/1fb5f26f-472e-4afb-a831-27eb47eac7da.jpeg",
+    "source/photos/c6b53835-7c1c-4d1d-8996-f352413cb6d2.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "velyur",
+     "color": "bordovyy",
+     "showroom": "roomer",
+     "discount_pct": 30,
+     "old_price": 96600,
+     "sample_price": 67600
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/edzhio",
+   "category": "uglovye-divany",
+   "slug": "edzhio",
+   "name": "Эджио",
+   "type": "Угловой",
+   "h1": "Угловой диван Эджио",
+   "url": "/catalog/uglovye-divany/edzhio/",
+   "model_family": "edzhio",
+   "length_cm": 345,
+   "depth_cm": 179,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 153,
+    "l": 300
+   },
+   "mechanism": "venetsiya",
+   "mechanism_name": "венеция",
+   "has_sleeping_place": true,
+   "has_storage": false,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie",
+    "bolshie"
+   ],
+   "price_from": 165000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/06cf521b-1d1c-4b9f-8866-e9510a5e78e4.jpeg",
+    "source/photos/76dfdda2-c2d0-402e-863e-90b10b5b165d.jpeg",
+    "source/photos/4ca92faf-bf61-43fb-a877-80808b1075fa.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "rogozhka",
+     "color": "bezhevyy",
+     "showroom": "imperiya",
+     "discount_pct": 15,
+     "old_price": 165000,
+     "sample_price": 140200
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/kembridzh",
+   "category": "uglovye-divany",
+   "slug": "kembridzh",
+   "name": "Кембридж",
+   "type": "Угловой",
+   "h1": "Угловой диван Кембридж",
+   "url": "/catalog/uglovye-divany/kembridzh/",
+   "model_family": "kembridzh",
+   "length_cm": 260,
+   "depth_cm": 105,
+   "height_cm": 80,
+   "seat_height_cm": 43,
+   "sleeping": {
+    "w": 150,
+    "l": 215
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "bolshie"
+   ],
+   "price_from": 145000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/52d5ae47-9ac1-481f-a60e-8ba998d18453.jpeg",
+    "source/photos/77b2d145-9975-4f28-9d8b-1376b2c0f864.jpeg",
+    "source/photos/dba9d465-f783-4f6f-bf4c-0a6a5556f49e.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/reymond",
+   "category": "uglovye-divany",
+   "slug": "reymond",
+   "name": "Реймонд",
+   "type": "Угловой",
+   "h1": "Угловой диван Реймонд",
+   "url": "/catalog/uglovye-divany/reymond/",
+   "model_family": "reymond",
+   "length_cm": 300,
+   "depth_cm": 205,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 280
+   },
+   "mechanism": "venetsiya",
+   "mechanism_name": "венеция",
+   "has_sleeping_place": true,
+   "has_storage": false,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy",
+    "bolshie"
+   ],
+   "price_from": 158000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/ef7593db-bfc1-4ce5-8c95-e85e167b306c.jpeg",
+    "source/photos/90da3037-86b6-4170-96df-da668e353efe.jpeg",
+    "source/photos/242d04f6-509e-49da-83fc-6c6c1a92e773.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/milano",
+   "category": "uglovye-divany",
+   "slug": "milano",
+   "name": "Милано",
+   "type": "Угловой",
+   "h1": "Угловой диван Милано",
+   "url": "/catalog/uglovye-divany/milano/",
+   "model_family": "milano",
+   "length_cm": 245,
+   "depth_cm": 162,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 153,
+    "l": 222
+   },
+   "mechanism": "venetsiya",
+   "mechanism_name": "венеция",
+   "has_sleeping_place": true,
+   "has_storage": false,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie"
+   ],
+   "price_from": 139000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "velyur",
+    "color": "zelenyy"
+   },
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/36dd9704-05dd-4319-a17b-db47b27bf70e.jpeg",
+    "source/photos/1cb749e2-885f-44f2-9076-58662ad52fba.jpeg",
+    "source/photos/4c053b73-ded6-4040-aff7-dceb6de90a89.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "velyur",
+     "color": "zelenyy",
+     "showroom": "tri-kita",
+     "discount_pct": 20,
+     "old_price": 145950,
+     "sample_price": 116800
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/floyd",
+   "category": "uglovye-divany",
+   "slug": "floyd",
+   "name": "Флоид",
+   "type": "Угловой",
+   "h1": "Угловой диван Флоид",
+   "url": "/catalog/uglovye-divany/floyd/",
+   "model_family": "floyd",
+   "length_cm": 235,
+   "depth_cm": 116,
+   "height_cm": 88,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": false,
+   "tags": [
+    "dizaynerskie"
+   ],
+   "price_from": 128000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/86d330ff-72d8-4803-9a8a-c16816378a24.jpeg",
+    "source/photos/984ae7aa-7cba-48eb-b843-f93c41cd2ac7.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/bombey",
+   "category": "uglovye-divany",
+   "slug": "bombey",
+   "name": "Бомбей",
+   "type": "Угловой",
+   "h1": "Угловой диван Бомбей",
+   "url": "/catalog/uglovye-divany/bombey/",
+   "model_family": "bombey",
+   "length_cm": 353,
+   "depth_cm": 150,
+   "height_cm": 80,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 300
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "bolshie"
+   ],
+   "price_from": 172000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "rogozhka",
+    "color": "seryy"
+   },
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/4d255527-be9b-457e-bdd1-290efeeff7cd.jpeg",
+    "source/photos/256bfae0-757e-4071-b159-e4b00e3ac53a.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/rolling",
+   "category": "uglovye-divany",
+   "slug": "rolling",
+   "name": "Роллинг",
+   "type": "Угловой",
+   "h1": "Угловой диван Роллинг",
+   "url": "/catalog/uglovye-divany/rolling/",
+   "model_family": "rolling",
+   "length_cm": 340,
+   "depth_cm": 150,
+   "height_cm": 80,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 300
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "bolshie"
+   ],
+   "price_from": 168000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/fc8761f5-5b42-4c88-9dab-0b7039cdb923.jpeg",
+    "source/photos/51720b83-a796-4ff0-9d4b-ac179e0afcc7.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "uglovye-divany/teylor",
+   "category": "uglovye-divany",
+   "slug": "teylor",
+   "name": "Тейлор",
+   "type": "Угловой",
+   "h1": "Угловой диван Тейлор",
+   "url": "/catalog/uglovye-divany/teylor/",
+   "model_family": "teylor",
+   "length_cm": 310,
+   "depth_cm": 170,
+   "height_cm": 85,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 260
+   },
+   "mechanism": "venetsiya",
+   "mechanism_name": "венеция",
+   "has_sleeping_place": true,
+   "has_storage": false,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie",
+    "bolshie"
+   ],
+   "price_from": 155000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": [
+    "left",
+    "right"
+   ],
+   "photos": [
+    "source/photos/4ca92faf-bf61-43fb-a877-80808b1075fa.jpeg",
+    "source/photos/e4ddfd7a-4ce7-4148-b122-2ae64a0dcf99.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18
+  },
+  {
+   "id": "modulnye-divany/shanhay",
+   "category": "modulnye-divany",
+   "slug": "shanhay",
+   "name": "Шанхай",
+   "type": "Модульный",
+   "h1": "Модульный диван Шанхай",
+   "url": "/catalog/modulnye-divany/shanhay/",
+   "model_family": "shanhay",
+   "length_cm": 330,
+   "depth_cm": 160,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": true,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie",
+    "bolshie"
+   ],
+   "price_from": 185000,
+   "lead_time_days": "14–21",
+   "in_stock": {
+    "material": "velyur",
+    "color": "siniy"
+   },
+   "sides": null,
+   "photos": [
+    "source/photos/b6f5cb9c-09c3-4ad9-9718-6558d4e22eb0.jpeg",
+    "source/photos/de56bdf2-b33f-4cd2-ace6-a5b13625e907.jpeg",
+    "source/photos/efe68672-eafe-4762-b8a5-049acee22eb5.jpeg",
+    "source/photos/f4ef93ca-a707-4bd8-9cff-4e45669e2750.jpeg",
+    "source/photos/191bf521-3ef4-4bd3-a45d-57697c6b5b9f.jpeg"
+   ],
+   "samples": [
+    {
+     "material": "velyur",
+     "color": "siniy",
+     "showroom": "himki-grand",
+     "discount_pct": 25,
+     "old_price": 194250,
+     "sample_price": 145700
+    }
+   ],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18,
+   "modules": [
+    "секция 100 см",
+    "секция 130 см",
+    "угловой модуль",
+    "оттоманка 100×100"
+   ]
+  },
+  {
+   "id": "modulnye-divany/edzhio",
+   "category": "modulnye-divany",
+   "slug": "edzhio",
+   "name": "Эджио",
+   "type": "Модульный",
+   "h1": "Модульный диван Эджио",
+   "url": "/catalog/modulnye-divany/edzhio/",
+   "model_family": "edzhio",
+   "length_cm": 235,
+   "depth_cm": 116,
+   "height_cm": 88,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "dizaynerskie"
+   ],
+   "price_from": 190000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/5acd56d7-ea88-42f6-aeb8-c4832b05ea4b.jpeg",
+    "source/photos/513c5a56-7a6e-4940-bc30-edd1717ec92e.jpeg",
+    "source/photos/b2079f44-c524-43c9-9ebe-d4def7ee2ef3.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18,
+   "modules": [
+    "секции 80/100/120 см",
+    "угловой модуль",
+    "оттоманка",
+    "съёмные подлокотники"
+   ]
+  },
+  {
+   "id": "modulnye-divany/bombey",
+   "category": "modulnye-divany",
+   "slug": "bombey",
+   "name": "Бомбей",
+   "type": "Модульный",
+   "h1": "Модульный диван Бомбей",
+   "url": "/catalog/modulnye-divany/bombey/",
+   "model_family": "bombey",
+   "length_cm": 300,
+   "depth_cm": 150,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": {
+    "w": 150,
+    "l": 300
+   },
+   "mechanism": "pantograf",
+   "mechanism_name": "пантограф",
+   "has_sleeping_place": true,
+   "has_storage": true,
+   "is_hit": false,
+   "tags": [
+    "dlya-gostinoy",
+    "bolshie"
+   ],
+   "price_from": 210000,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "photos": [
+    "source/photos/6118cd3d-8f27-4c98-ae08-8afacc33aca3.jpeg",
+    "source/photos/dcf678b7-79ce-4aaa-b4f1-dc4b65583278.jpeg",
+    "source/photos/489e3e31-6638-4199-a1c2-3f80cc400c51.jpeg"
+   ],
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18,
+   "modules": [
+    "секции с механизмом пантограф",
+    "угловой модуль",
+    "оттоманка"
+   ]
+  }
+ ],
+ "showrooms": [
+  {
+   "slug": "himki-grand",
+   "name": "ТЦ «Гранд», Химки",
+   "address": "г. Химки, ул. Бутакова, 4, 2 этаж",
+   "hours": "10:00–21:00",
+   "phone": "+7 929 677-78-75",
+   "is_main": true
+  },
+  {
+   "slug": "tvoy-dom",
+   "name": "ТЦ «Твой Дом», 24 км МКАД",
+   "address": "Москва, 24 км МКАД, 2 этаж, подиум Sofas Space",
+   "hours": "10:00–22:00",
+   "phone": "+7 926 208-77-76",
+   "is_main": false
+  },
+  {
+   "slug": "imperiya",
+   "name": "ТЦ «Империя»",
+   "address": "Москва, Дмитровское шоссе, 161Б, 2 этаж, подиум Simmetrika",
+   "hours": "10:00–21:00",
+   "phone": "+7 916 586-90-01",
+   "is_main": false
+  },
+  {
+   "slug": "tri-kita",
+   "name": "ТЦ «Три Кита»",
+   "address": "Московская обл., Луговая ул., 1, 2 этаж",
+   "hours": "10:00–21:00",
+   "phone": "+7 916 586-90-01",
+   "is_main": false
+  },
+  {
+   "slug": "roomer",
+   "name": "МЦ Roomer",
+   "address": "Москва, Ленинская Слобода, 26, 1 этаж, павильон Б-119",
+   "hours": "10:00–22:00",
+   "phone": "+7 916 237-08-53",
+   "is_main": false
+  }
+ ],
+ "settings": {
+  "phone_main": "+7 929 677-78-75",
+  "phone_second": "+7 926 208-77-76",
+  "email": "simmetrika@mail.ru",
+  "vk": "https://vk.com/club177326997",
+  "work_hours_calls": "10:00–21:00",
+  "callback_promise": "перезвоним в течение 1 часа в рабочее время 10:00–21:00",
+  "delivery": {
+   "moscow_mkad_rub": 1500,
+   "outside_mkad_per_km_rub": 40,
+   "lift_floor_rub": "бесплатно при лифте, 300 ₽/этаж без лифта",
+   "assembly": "сборка угловых и модульных включена",
+   "pickup": "бесплатно из любого шоурума",
+   "in_stock_days": "1–3",
+   "made_to_order_days": "14–21",
+   "standard_days": 30,
+   "prepayment_custom_pct": 30,
+   "payment": [
+    "наличными или картой курьеру",
+    "безналичный расчёт по счёту"
+   ],
+   "region_limit_km": 60
+  },
+  "warranty_months": 18,
+  "service_life_years": 10,
+  "legal": "[ДОПУЩЕНИЕ Q-11] реквизиты не публикуются до ответа клиента"
+ }
+}

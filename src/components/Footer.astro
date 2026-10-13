@@ -1,0 +1,39 @@
+---
+import { u } from '../lib/site.mjs';
+import { settings, showrooms } from '../lib/catalog.mjs';
+const tel = (p) => 'tel:' + p.replace(/[^\d+]/g, '');
+const year = new Date().getFullYear();
+---
+<div class="ftop"><div class="wrap ftop-in"><span>Новинки, образцы на распродаже и акции фабрики в сообществе</span><a class="round" href={settings.vk} target="_blank" rel="noopener" aria-label="SIMMETRIKA ВКонтакте"><svg viewBox="0 0 24 24"><path d="M3 7h3c.2 4 1.8 6 3 6.3V7h2.8v3.6c1.2-.1 2.4-1.6 2.8-3.6h2.8c-.3 1.9-1.6 3.4-2.6 4.1 1 .5 2.6 1.8 3.2 4.4h-3c-.4-1.5-1.6-2.7-3.2-2.8v2.8H11C6 15.5 3.2 12 3 7z" fill="currentColor"/></svg></a></div></div>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-grid">
+      <div>
+        <h2>Москва и Московская область</h2>
+        <p><a class="ftr-phone" href={tel(settings.phone_main)}>{settings.phone_main}</a></p>
+        <p><a href={tel(settings.phone_second)}>{settings.phone_second}</a></p>
+        <p>Звонки ежедневно {settings.work_hours_calls}</p>
+        <p><a href={`mailto:${settings.email}`}>{settings.email}</a></p>
+      </div>
+      <div><h2>Каталог</h2><ul>
+        <li><a href={u('/catalog/pryamye-divany/')}>Прямые диваны</a></li>
+        <li><a href={u('/catalog/uglovye-divany/')}>Угловые диваны</a></li>
+        <li><a href={u('/catalog/modulnye-divany/')}>Модульные диваны</a></li>
+        <li><a href={u('/catalog/divany-krovati/')}>Диваны-кровати</a></li>
+        <li><a href={u('/catalog/v-nalichii/')}>В наличии</a></li>
+        <li><a href={u('/sale/')}>Распродажа образцов</a></li>
+      </ul></div>
+      <div><h2>Покупателям</h2><ul>
+        <li><a href={u('/na-zakaz/')}>Диваны на заказ</a></li>
+        <li><a href={u('/dostavka/')}>Доставка и оплата</a></li>
+        <li><a href={u('/o-kompanii/')}>О фабрике</a></li>
+        <li><a href={u('/news/')}>Новости и акции</a></li>
+        <li><a href={u('/kontakty/')}>Шоурумы и контакты</a></li>
+      </ul></div>
+      <div><h2>Шоурумы</h2><ul>
+        {showrooms.map((s) => <li><a href={u(`/kontakty/#${s.slug}`)}>{s.name}</a></li>)}
+      </ul></div>
+    </div>
+    <div class="ftr-bottom"><span>© {year} SIMMETRIKA, мебельная фабрика</span><a href={u('/privacy/')}>Политика конфиденциальности</a></div>
+  </div>
+</footer>

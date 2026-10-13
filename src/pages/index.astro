@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import Faq from '../components/Faq.astro';
+import Related from '../components/Related.astro';
+import { byUrl } from '../lib/content.mjs';
+import { renderMd } from '../lib/md.mjs';
+import { splitSections, inner, cardify } from '../lib/layout.mjs';
+import { graph } from '../lib/schema.mjs';
+import { u } from '../lib/site.mjs';
+import { picture, tiles } from '../lib/render.mjs';
+const page = byUrl()['/'];
+const d = page.data;
+const { intro, sections } = splitSections(renderMd(page.body));
+// первый экран: интерьерный кадр из фото клиента (тёмная плоскость как в референсе); в черновике был кадр из цеха
+const hero = d.images?.find((x) => x.slot === 'tile-pryamye') || d.images?.find((x) => x.slot === 'hero');
+const ICONS = {
+  straight: '<svg viewBox="0 0 100 60"><path d="M10 26h80v18H10zM14 26V14h72v12M14 44v6M86 44v6M10 30H4v14h6M90 30h6v14h-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  corner: '<svg viewBox="0 0 100 60"><path d="M8 24h60v16H8zM68 24h24v30H68zM12 24V14h76v10M8 40v8M92 54v4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  modular: '<svg viewBox="0 0 100 60"><path d="M6 24h28v18H6zM36 24h28v18H36zM66 24h28v18H66zM8 24V14h24v10M38 24V14h24v10M68 24V14h24v10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  bed: '<svg viewBox="0 0 100 60"><path d="M10 30h80v14H10zM10 30V16h80v14M16 44v6M84 44v6M20 30l8-10h44l8 10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  sale: '<svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="22" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M40 40l20-20" stroke="currentColor" stroke-width="1.6"/><circle cx="41" cy="22" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="59" cy="38" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  ruler: '<svg viewBox="0 0 100 60"><path d="M8 22h84v16H8zM18 22v7M28 22v5M38 22v7M48 22v5M58 22v7M68 22v5M78 22v7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+};
+const cats = [
+  ['Прямые диваны', '/catalog/pryamye-divany/', 'straight'], ['Угловые диваны', '/catalog/uglovye-divany/', 'corner'],
+  ['Модульные системы', '/catalog/modulnye-divany/', 'modular'], ['Диваны-кровати', '/catalog/divany-krovati/', 'bed'],
+  ['Распродажа образцов', '/sale/', 'sale'], ['Диваны на заказ', '/na-zakaz/', 'ruler'],
+];
+const kind = (t) => /^Каталог/.test(t) ? 'catalog' : /Распродажа/.test(t) ? 'panel' : /Почему|что производим/.test(t) ? 'cards' : /под ваш размер/.test(t) ? 'dark' : /шоурум/i.test(t) ? 'panel' : /Задать вопрос/.test(t) ? 'panel' : 'plain';
+const body = (s) => { const h = inner(s.html); return h.replace(/<h2[^>]*>[\s\S]*?<\/h2>/, ''); };
+const lead = (h) => { const m = h.match(/^\s*(<p>[\s\S]*?<\/p>)/); return m ? [m[1], h.slice(m[0].length)] : ['', h]; };
+const schema = graph(page, { faq: d.faq, type: 'home' });
+---
+<Base data={d} schema={schema} home ogImage={hero?.src}>
+  <section class="hero">
+    <div class="hero-img">{hero && <Fragment set:html={picture(hero.src, hero.alt, { eager: true, sizes: '100vw' })} />}</div>
+    <div class="wrap hero-in">
+      <h1>{d.h1}</h1>
+      <p class="hero-lede">{d.lede}</p>
+      <div class="hero-btns"><a class="btn btn-accent" href={u('/catalog/')}>Выбрать диван</a><button class="btn btn-white" type="button" data-callback>Обратный звонок</button></div>
+      <p class="hero-note">Заявка на сайте без оплаты: менеджер перезвонит и согласует ткань, цену и срок</p>
+    </div>
+  </section>
+  <nav class="cats" aria-label="Разделы каталога"><div class="wrap cats-in">
+    {cats.map(([t, url, ic]) => <a class="cat" href={u(url)}><span>{t}</span><Fragment set:html={ICONS[ic]} /></a>)}
+  </div></nav>
+  {intro && <div class="band"><div class="wrap home-sec"><div class="sec-lead" set:html={intro} /></div></div>}
+  {sections.map((s) => {
+    const k = kind(s.title);
+    const [l, rest] = lead(body(s));
+    if (k === 'dark') return <section class="dark"><div class="wrap home-sec"><h2>{s.title}</h2><div class="sec-body" set:html={l + rest} /></div></section>;
+    if (k === 'catalog') return <section class="band"><div class="wrap home-sec"><h2 class="sec-h">{s.title}</h2><div class="sec-lead" set:html={l} /><Fragment set:html={tiles(['/catalog/pryamye-divany/', '/catalog/uglovye-divany/', '/catalog/modulnye-divany/', '/catalog/divany-krovati/'])} /><div class="sec-body prose" set:html={cardify(rest, { force: true })} /></div></section>;
+    return <section class={`band ${k === 'panel' ? 'band-panel' : ''}`}><div class="wrap home-sec prose"><h2 class="sec-h">{s.title}</h2><div class="sec-lead" set:html={l} /><div class="sec-body" set:html={k === 'cards' ? cardify(rest, { force: true }) : rest} /></div></section>;
+  })}
+  <div class="wrap facts">{(d.highlights || []).map((h) => <div class="fact"><span>{h.label}</span><b>{h.value}</b></div>)}</div>
+  <Faq items={d.faq} title={d.faq_title} />
+  <Related items={d.related} />
+</Base>

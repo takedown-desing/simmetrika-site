@@ -1,0 +1,3 @@
+# Превью на GitHub Pages закрыто от индексации. Боевой robots.txt генерируется на simmetrika-mebel.ru.
+User-agent: *
+Disallow: /

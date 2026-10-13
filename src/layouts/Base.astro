@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, u, canonical } from '../lib/site.mjs';
+import { img } from '../lib/catalog.mjs';
+const { data = {}, schema, home = false, ogImage, bodyClass = '', noindex = false } = Astro.props;
+const title = data.title || 'SIMMETRIKA';
+const desc = data.description || '';
+const og = ogImage ? img(ogImage) : null;
+const robots = SITE.preview || noindex || /noindex/.test(data.robots || '') ? 'noindex, nofollow' : 'index, follow';
+---
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title}</title>
+  <meta name="description" content={desc}>
+  <meta name="robots" content={robots}>
+  {data.url && !String(data.url).includes('{') && <link rel="canonical" href={canonical(data.url)}>}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content={data.og_title || title}>
+  <meta property="og:description" content={data.og_description || desc}>
+  {og && <meta property="og:image" content={SITE.origin + u(og.l)}>}
+  <meta property="og:locale" content="ru_RU">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap&subset=cyrillic">
+  <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml">
+  {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+</head>
+<body class={bodyClass} data-base={SITE.base}>
+  <a class="skip" href="#main">К содержимому</a>
+  {SITE.preview && <div class="preview-bar">Превью сайта SIMMETRIKA для согласования. Цены, сроки и условия предварительные, заявки с этой версии не отправляются менеджеру.</div>}
+  <Header home={home} current={data.url} />
+  <main id="main"><slot /></main>
+  <Footer />
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Форма заявки"><div class="modal-in"><button class="round modal-x" type="button" data-close aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2"/></svg></button><div data-modal-body></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script is:inline src={u('/js/app.js')} defer></script>
+</body>
+</html>

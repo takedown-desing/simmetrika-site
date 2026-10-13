@@ -1,0 +1,15 @@
+---
+import { u } from '../lib/site.mjs';
+const { data = {}, crumbs = [], children: _c } = Astro.props;
+const cta = data.hero_cta || {};
+const btn = (b, cls) => !b ? '' : b.action === 'callback' ? `<button type="button" class="btn ${cls}" data-callback>${b.label}</button>` : `<a class="btn ${cls}" href="${u(b.href)}">${b.label}</a>`;
+---
+<div class="phead"><div class="wrap">
+  {crumbs.length > 0 && <ol class="crumbs">{crumbs.map((c, i) => <li>{i < crumbs.length - 1 ? <a href={u(c.url)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}</ol>}
+  {data.eyebrow && <p class="eyebrow">{data.eyebrow}</p>}
+  <h1>{data.h1}</h1>
+  {data.lede && <p class="lede">{data.lede}</p>}
+  {data.highlights?.length > 0 && <div class="hl">{data.highlights.map((h) => <div><b>{h.value}</b><span>{h.label}</span></div>)}</div>}
+  {(cta.primary || cta.secondary) && <div class="phead-btns" set:html={btn(cta.primary, 'btn-accent') + btn(cta.secondary, 'btn-line')} />}
+  <slot />
+</div></div>
