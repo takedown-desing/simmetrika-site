@@ -16,12 +16,11 @@ export function graph(page, { product, faq, breadcrumbs, type } = {}) {
     const prices = ['rogozhka', 'velyur', 'zhakkard'].map((m) => variantPrice(p, m));
     g.push({ '@type': 'Product', '@id': canonical(p.url) + '#product', name: p.h1, sku: p.id.replace('/', '-'), brand: { '@type': 'Brand', name: 'SIMMETRIKA' }, manufacturer: { '@id': ORG }, image: (p.photos || []).map((s) => img(s)?.l).filter(Boolean).map((x) => SITE.canonicalOrigin + x), description: d.description,
       additionalProperty: [
-        { '@type': 'PropertyValue', name: 'Длина', value: p.length_cm, unitCode: 'CMT' },
-        { '@type': 'PropertyValue', name: 'Глубина', value: p.depth_cm, unitCode: 'CMT' },
+        ...(p.length_cm ? [{ '@type': 'PropertyValue', name: 'Длина', value: p.length_cm, unitCode: 'CMT' }, { '@type': 'PropertyValue', name: 'Глубина', value: p.depth_cm, unitCode: 'CMT' }] : []),
         { '@type': 'PropertyValue', name: 'Механизм', value: p.mechanism_name },
         ...(p.sleeping ? [{ '@type': 'PropertyValue', name: 'Спальное место', value: `${p.sleeping.w}×${p.sleeping.l} см` }] : []),
       ],
-      offers: { '@type': 'AggregateOffer', priceCurrency: 'RUB', lowPrice: Math.min(...prices), highPrice: Math.max(...prices), offerCount: 3, availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder', seller: { '@id': ORG } } });
+      ...(p.price_from ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'RUB', lowPrice: Math.min(...prices), highPrice: Math.max(...prices), offerCount: 3, availability: p.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder', seller: { '@id': ORG } } } : {}) });
   }
   if (d.type === 'contact') for (const s of showrooms) g.push({ '@type': 'FurnitureStore', '@id': `${SITE.canonicalOrigin}/kontakty/#${s.slug}`, name: `SIMMETRIKA, ${s.name}`, address: { '@type': 'PostalAddress', streetAddress: s.address, addressCountry: 'RU' }, ...(s.lat ? { geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lon } } : {}), telephone: s.phone, openingHours: `Mo-Su ${s.hours.replace('–', '-')}`, parentOrganization: { '@id': ORG } });
   if (faq?.length) g.push({ '@type': 'FAQPage', mainEntity: faq.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })) });

@@ -20,9 +20,10 @@ export const MECH = CAT.mechanisms;
 export const SHOWROOM = Object.fromEntries(CAT.showrooms.map((s) => [s.slug, s]));
 export const img = (src) => (src && IMG[src]) || null;
 export const rub = (n) => (n == null ? '' : Math.round(n).toLocaleString('ru-RU').replace(/ /g, ' ') + ' ₽');
-export const variantPrice = (p, material = 'rogozhka') => Math.round((p.price_from * (MATERIAL[material]?.price_k || 1)) / 100) * 100;
+export const variantPrice = (p, material = 'rogozhka') => (p.price_from ? Math.round((p.price_from * (MATERIAL[material]?.price_k || 1)) / 100) * 100 : null);
+export const priceText = (p, material = 'rogozhka', from = true) => (p.price_from ? `${from ? 'от ' : ''}${rub(variantPrice(p, material))}` : 'цена по запросу');
 export const productColors = () => Object.keys(COLOR_HEX).filter((c) => CAT.fabrics.some((f) => f.colors.includes(c)));
-export const sizeStr = (p) => [p.length_cm, p.depth_cm, p.height_cm].filter(Boolean).join('×') + ' см';
+export const sizeStr = (p) => (p.length_cm ? [p.length_cm, p.depth_cm, p.height_cm].filter(Boolean).join('×') + ' см' : 'размеры по запросу');
 export const sleepStr = (p) => (p.sleeping ? `${p.sleeping.w}×${p.sleeping.l} см` : 'нет');
 export const bestSample = (p) => (p.samples || []).slice().sort((a, b) => b.discount_pct - a.discount_pct)[0] || null;
 
@@ -37,6 +38,8 @@ export function parseRule(rule = 'all') {
 }
 export function matchRule(p, rule) {
   const r = typeof rule === 'string' ? parseRule(rule) : rule || {};
+  // кресла и пуфы показываем только в их разделе; общие подборки и «все диваны» только с диванами
+  if (!r.category && p.category === 'kresla') return false;
   for (const [k, v] of Object.entries(r)) {
     if (k === 'all') continue;
     if (k === 'category' && p.category !== v) return false;
@@ -61,4 +64,4 @@ export const select = (rule, limit) => {
   else list.sort((a, b) => (b.is_hit - a.is_hit) || (a.price_from - b.price_from));
   return limit ? list.slice(0, Number(limit)) : list;
 };
-export const minPrice = (list, material) => Math.min(...list.map((p) => variantPrice(p, material || 'rogozhka')));
+export const minPrice = (list, material) => Math.min(...list.map((p) => variantPrice(p, material || 'rogozhka')).filter(Boolean));

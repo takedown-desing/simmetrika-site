@@ -70,7 +70,7 @@
     if (!modal) return;
     const body = $('[data-modal-body]', modal);
     const title = kind === 'one_click' ? 'Заказать в один клик' : 'Обратный звонок';
-    const lead = kind === 'one_click' && item ? `${item.name}, ${MAT[item.material] || ''}${item.color ? ', ' + COLORS[item.color] : ''}${item.side ? ', ' + (item.side === 'left' ? 'левый угол' : 'правый угол') : ''}. Ориентировочно ${rub(item.price)}.` : 'Оставьте телефон, перезвоним в течение часа в рабочее время 10:00–21:00.';
+    const lead = kind === 'one_click' && item ? `${item.name}, ${MAT[item.material] || ''}${item.color ? ', ' + COLORS[item.color] : ''}${item.side ? ', ' + (item.side === 'left' ? 'левый угол' : 'правый угол') : ''}. ${item.price ? 'Ориентировочно ' + rub(item.price) : 'Цену рассчитает менеджер'}.` : 'Оставьте телефон, перезвоним в течение часа в рабочее время 10:00–21:00.';
     body.innerHTML = `<form class="lead-form" data-form="${kind}" novalidate><p class="lf-t">${title}</p><p class="lf-l">${lead}</p><div class="fld-row"><label class="fld"><span>Имя</span><input name="name" autocomplete="name"></label><label class="fld"><span>Телефон *</span><input name="phone" type="tel" required autocomplete="tel" data-mask placeholder="+7 (___) ___-__-__"></label></div><label class="fld-check"><input type="checkbox" name="consent" required> Согласен на обработку персональных данных по <a href="${BASE}/privacy/#soglasie">политике конфиденциальности</a></label><p class="lf-err" data-err role="alert"></p><button class="btn btn-accent" type="submit">Отправить</button><p class="lf-ok" data-ok hidden>Спасибо, заявка принята. Перезвоним в течение 1 часа в рабочее время 10:00–21:00.</p></form>`;
     if (item) $('form', body)._items = [{ ...item, qty: 1 }];
     modal.classList.add('is-open');
@@ -84,8 +84,8 @@
     const P = JSON.parse(pp.dataset.product);
     const st = { material: 'rogozhka', color: null, side: P.sides ? 'left' : null };
     const firstColor = $('[data-colors-box] [aria-pressed="true"]'); st.color = firstColor?.dataset.v || null;
-    const price = () => Math.round((P.base * (P.k[st.material] || 1)) / 100) * 100;
-    const upd = () => { $('[data-price]').textContent = rub(price()); };
+    const price = () => (P.base ? Math.round((P.base * (P.k[st.material] || 1)) / 100) * 100 : 0);
+    const upd = () => { if (P.base) $('[data-price]').textContent = rub(price()); };
     const press = (box, btn) => { $$('button', box).forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')); };
     const colorsBox = $('[data-colors-box]');
     const bindColors = () => $$('button', colorsBox).forEach((b) => b.addEventListener('click', () => { press(colorsBox, b); st.color = b.dataset.v; $('[data-color-name]').textContent = b.dataset.n; }));
@@ -120,13 +120,14 @@
         let ok = true;
         if (v.cat && c.dataset.cat !== v.cat) ok = false;
         if (v.mech && c.dataset.mech !== v.mech) ok = false;
-        if (v.price) { const [a, b] = v.price.split('-').map(Number); const p = Number(c.dataset.price); if (p < a || p > b) ok = false; }
-        if (v.len) { const [a, b] = v.len.split('-').map(Number); const l = Number(c.dataset.len); if (l < a || l > b) ok = false; }
+        if (v.price) { const [a, b] = v.price.split('-').map(Number); const p = Number(c.dataset.price); if (!c.dataset.price || p < a || p > b) ok = false; }
+        if (v.len) { const [a, b] = v.len.split('-').map(Number); const l = Number(c.dataset.len); if (!c.dataset.len || l < a || l > b) ok = false; }
         if (v.stock && c.dataset.stock !== '1') ok = false;
         c.hidden = !ok; if (ok) n++;
       });
       const s = $('[data-sort]', fb)?.value || 'pop';
-      const sorted = cards.slice().sort((a, b) => s === 'asc' ? a.dataset.price - b.dataset.price : s === 'desc' ? b.dataset.price - a.dataset.price : (b.dataset.hit - a.dataset.hit) || (a.dataset.sort - b.dataset.sort));
+      const pr = (c) => Number(c.dataset.price) || Infinity;
+      const sorted = cards.slice().sort((a, b) => s === 'asc' ? pr(a) - pr(b) : s === 'desc' ? (Number(b.dataset.price) || 0) - (Number(a.dataset.price) || 0) : (b.dataset.hit - a.dataset.hit) || (a.dataset.sort - b.dataset.sort));
       sorted.forEach((c) => grid.append(c));
       const f = $('[data-found]', fb); if (f) f.textContent = `Найдено: ${n}`;
       let em = grid.nextElementSibling?.matches?.('.empty[data-auto]') ? grid.nextElementSibling : null;
@@ -146,7 +147,7 @@
       const items = load();
       $('[data-cart-empty]').hidden = items.length > 0;
       $('[data-cart-sum]').hidden = items.length === 0;
-      list.innerHTML = items.map((it, i) => `<div class="ci"><a href="${BASE}${it.url}">${it.img ? `<img src="${BASE}${it.img}" alt="" width="120" height="90">` : '<span class="ph"></span>'}</a><div><a class="ci-t" href="${BASE}${it.url}">${it.name}</a><p class="ci-v">${[it.material ? MAT[it.material] : '', it.color ? COLORS[it.color] : 'цвет уточним', it.side ? (it.side === 'left' ? 'левый угол' : 'правый угол') : '', it.sample ? 'выставочный образец' : ''].filter(Boolean).join(', ')}</p><div class="ci-q"><button type="button" data-q="-1" data-i="${i}" aria-label="Меньше">−</button><span>${it.qty}</span><button type="button" data-q="1" data-i="${i}" aria-label="Больше">+</button></div><button class="ci-x" type="button" data-rm="${i}">Удалить</button></div><div class="ci-p">${rub(it.price * it.qty)}</div></div>`).join('');
+      list.innerHTML = items.map((it, i) => `<div class="ci"><a href="${BASE}${it.url}">${it.img ? `<img src="${BASE}${it.img}" alt="" width="120" height="90">` : '<span class="ph"></span>'}</a><div><a class="ci-t" href="${BASE}${it.url}">${it.name}</a><p class="ci-v">${[it.material ? MAT[it.material] : '', it.color ? COLORS[it.color] : 'цвет уточним', it.side ? (it.side === 'left' ? 'левый угол' : 'правый угол') : '', it.sample ? 'выставочный образец' : ''].filter(Boolean).join(', ')}</p><div class="ci-q"><button type="button" data-q="-1" data-i="${i}" aria-label="Меньше">−</button><span>${it.qty}</span><button type="button" data-q="1" data-i="${i}" aria-label="Больше">+</button></div><button class="ci-x" type="button" data-rm="${i}">Удалить</button></div><div class="ci-p">${it.price ? rub(it.price * it.qty) : 'по запросу'}</div></div>`).join('');
       $('[data-cart-count]').textContent = items.reduce((s, x) => s + x.qty, 0);
       $('[data-cart-total]').textContent = 'около ' + rub(items.reduce((s, x) => s + x.price * x.qty, 0));
     };

@@ -7,7 +7,7 @@ import { loadPages } from '../lib/content.mjs';
 import { renderMd } from '../lib/md.mjs';
 import { graph } from '../lib/schema.mjs';
 import { u } from '../lib/site.mjs';
-import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
+import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
 import { picture, productCard, showroomsHtml, cartPayload, esc } from '../lib/render.mjs';
 import { cardifySections as cardify } from '../lib/layout.mjs';
 
@@ -52,8 +52,8 @@ const fab = Object.values(MATERIAL);
       <div class="buy">
         <p class="eyebrow">{CATEGORY[p.category]?.name}</p>
         <h1>{d.h1}</h1>
-        <p class="buy-sub">{sizeStr(p)}{p.sleeping ? `, спальное место ${p.sleeping.w}×${p.sleeping.l} см` : ', без спального места'} · {p.mechanism !== 'none' ? `механизм ${p.mechanism_name}` : 'нераскладной'}</p>
-        <p class="buy-price"><span data-price>{rub(variantPrice(p, 'rogozhka'))}</span> <small>ориентировочно, в выбранной ткани</small></p>
+        <p class="buy-sub">{p.category === 'kresla' ? `${sizeStr(p)} · обивка в тон дивану` : <>{sizeStr(p)}{p.sleeping ? `, спальное место ${p.sleeping.w}×${p.sleeping.l} см` : ', без спального места'} · {p.mechanism !== 'none' ? `механизм ${p.mechanism_name}` : 'нераскладной'}</>}</p>
+        <p class="buy-price"><span data-price>{priceText(p, 'rogozhka', false)}</span> <small>{p.price_from ? 'ориентировочно, в выбранной ткани' : 'рассчитает менеджер в выбранной ткани'}</small></p>
         <p class="buy-note">Финальную цену с учётом ткани, размера и доставки согласует менеджер.</p>
         <div class="opt"><p class="opt-t">Материал обивки</p><div class="seg" data-material>{fab.map((f, i) => <button type="button" data-v={f.material} aria-pressed={i === 1 ? 'true' : 'false'} data-colors={f.colors.join(',')}>{f.name}</button>)}</div></div>
         <div class="opt"><p class="opt-t">Цвет: <span data-color-name>{COLOR_NAME[MATERIAL.rogozhka.colors[0]]}</span></p><div class="colors" data-colors-box>{MATERIAL.rogozhka.colors.map((c, i) => <button type="button" style={`--sw:${COLOR_HEX[c]}`} data-v={c} data-n={COLOR_NAME[c]} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={COLOR_NAME[c]}></button>)}</div></div>
@@ -92,7 +92,7 @@ const fab = Object.values(MATERIAL);
       </section>
       {family.length > 0 && <section class="sec"><h2>Эта модель в других исполнениях</h2><div class="pgrid">{family.map((x) => <Fragment set:html={productCard(x)} />)}</div></section>}
       <section class="sec"><h2>Доставка и где посмотреть</h2>
-        <p>Доставка по Москве в пределах МКАД {rub(settings.delivery.moscow_mkad_rub)}, за МКАД плюс {settings.delivery.outside_mkad_per_km_rub} ₽ за километр, самовывоз из шоурума бесплатно. {p.category === 'pryamye-divany' ? '' : 'Сборка включена. '}Подробнее на странице <a href={u('/dostavka/')}>доставка и сборка</a>. Нужен другой размер: <a href={u('/na-zakaz/')}>диваны на заказ</a>.</p>
+        <p>Доставка по Москве в пределах МКАД {rub(settings.delivery.moscow_mkad_rub)}, за МКАД плюс {settings.delivery.outside_mkad_per_km_rub} ₽ за километр, самовывоз из шоурума бесплатно. {['uglovye-divany', 'modulnye-divany'].includes(p.category) ? 'Сборка включена. ' : ''}Подробнее на странице <a href={u('/dostavka/')}>доставка и сборка</a>. Нужен другой размер: <a href={u('/na-zakaz/')}>диваны на заказ</a>.</p>
         <Fragment set:html={showroomsHtml('list')} />
       </section>
       {similar.length > 0 && <section class="sec"><h2>Похожие модели</h2><div class="pgrid">{similar.map((x) => <Fragment set:html={productCard(x)} />)}</div></section>}

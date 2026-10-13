@@ -2,7 +2,7 @@
 import { u } from './site.mjs';
 import {
   products, showrooms, settings, fabrics, COLOR_HEX, COLOR_NAME, MATERIAL, CATEGORY, MECH, SHOWROOM,
-  img, rub, variantPrice, sizeStr, sleepStr, bestSample, select, minPrice, parseRule, productColors,
+  img, rub, variantPrice, priceText, sizeStr, sleepStr, bestSample, select, minPrice, parseRule, productColors,
 } from './catalog.mjs';
 import { byUrl, loadPages, titleOf } from './content.mjs';
 
@@ -33,8 +33,8 @@ export function productCard(p, { sale = false, h = 'h3' } = {}) {
   const badges = [];
   if (p.mechanism !== 'none') badges.push(`<span class="pc-ico" title="Механизм ${esc(p.mechanism_name)}">${ICON.mech}</span>`);
   if (p.has_storage) badges.push(`<span class="pc-ico" title="Ящик для белья">${ICON.box}</span>`);
-  const sub = [CATEGORY[p.category]?.name.replace(' диваны и системы', '').replace(' диваны', ''), p.mechanism !== 'none' ? p.mechanism_name : 'без механизма'].filter(Boolean).join(' · ');
-  return `<article class="pc" data-cat="${p.category}" data-mech="${p.mechanism}" data-len="${p.length_cm}" data-price="${price}" data-stock="${p.in_stock ? 1 : 0}" data-sleep="${p.has_sleeping_place ? 1 : 0}" data-hit="${p.is_hit ? 1 : 0}" data-sort="${products.indexOf(p)}">
+  const sub = p.category === 'kresla' ? 'Кресла и пуфы' : [CATEGORY[p.category]?.name.replace(' диваны и системы', '').replace(' диваны', ''), p.mechanism !== 'none' ? p.mechanism_name : 'без механизма'].filter(Boolean).join(' · ');
+  return `<article class="pc" data-cat="${p.category}" data-mech="${p.mechanism}" data-len="${p.length_cm || ''}" data-price="${price || ''}" data-stock="${p.in_stock ? 1 : 0}" data-sleep="${p.has_sleeping_place ? 1 : 0}" data-hit="${p.is_hit ? 1 : 0}" data-sort="${products.indexOf(p)}">
   <a class="pc-photo" href="${u(p.url)}" tabindex="-1" aria-hidden="true">${picture(p.photos?.[0], p.h1, { sizes: '(min-width: 1100px) 380px, (min-width: 700px) 45vw, 92vw' })}
     ${p.in_stock ? `<span class="pc-stock" title="Есть в наличии">${ICON.stock}</span>` : ''}
     <span class="pc-icons">${badges.join('')}</span>
@@ -43,7 +43,7 @@ export function productCard(p, { sale = false, h = 'h3' } = {}) {
   <div class="pc-body">
     <${h} class="pc-name"><a href="${u(p.url)}">${esc(p.name)}</a></${h}>
     <p class="pc-sub">${esc(sub)}</p>
-    <p class="pc-price">${s ? `<b class="is-sale">${rub(price)}</b> <s>${rub(s.old_price)}</s>` : `от <b>${rub(price)}</b>`}</p>
+    <p class="pc-price">${s ? `<b class="is-sale">${rub(price)}</b> <s>${rub(s.old_price)}</s>` : p.price_from ? `от <b>${rub(price)}</b>` : '<b>цена по запросу</b>'}</p>
     <p class="pc-dims">${sizeStr(p)}${p.sleeping ? ` · спальное ${p.sleeping.w}×${p.sleeping.l}` : ''}</p>
     <p class="pc-dots" aria-label="Доступные цвета">${colors.map((c) => `<span style="background:${COLOR_HEX[c]}" title="${esc(COLOR_NAME[c])}"></span>`).join('')}<em>+${productColors().length - colors.length}</em></p>
     <p class="pc-actions"><a class="btn btn-sm btn-line" href="${u(p.url)}">Подробнее</a><button type="button" class="btn btn-sm btn-accent" data-add="${cartPayload(p, mat, s?.color || null, s ? { sample: s.showroom } : {})}">В заявку</button></p>
@@ -132,7 +132,7 @@ const COLS = {
   sleeping: ['Спальное место', (p) => sleepStr(p)],
   mechanism: ['Механизм', (p) => esc(p.mechanism_name)],
   side: ['Угол', (p) => (p.sides ? 'левый / правый' : '—')],
-  price: ['Цена от', (p) => rub(variantPrice(p))],
+  price: ['Цена от', (p) => (p.price_from ? rub(variantPrice(p)) : 'по запросу')],
 };
 export function specTable(rule = 'all', cols = 'name,size,sleeping,mechanism,price') {
   const c = cols.split(',').map((x) => x.trim()).filter((x) => COLS[x]);

@@ -1,6 +1,6 @@
-# QA-отчёт сборки (2026-10-13T10:15)
+# QA-отчёт сборки (2026-10-13T10:33)
 
-Страниц: 62. CRITICAL: 0. WARN: 0.
+Страниц: 65. CRITICAL: 0. WARN: 0.
 
 | URL | title | desc | Проверка |
 |---|---:|---:|---|
@@ -24,6 +24,9 @@
 | /catalog/divany-krovati/venetsiya/ | 57 | 154 | ok |
 | /catalog/divany-krovati/vykatnye/ | 54 | 145 | ok |
 | /catalog/dizaynerskie-divany/ | 55 | 151 | ok |
+| /catalog/kresla/ | 52 | 146 | ok |
+| /catalog/kresla/kreslo-na-tsokole/ | 58 | 146 | ok |
+| /catalog/kresla/kreslo-s-pufom/ | 54 | 153 | ok |
 | /catalog/modulnye-divany/ | 55 | 149 | ok |
 | /catalog/modulnye-divany/bombey/ | 60 | 144 | ok |
 | /catalog/modulnye-divany/edzhio/ | 59 | 145 | ok |

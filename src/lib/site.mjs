@@ -30,6 +30,7 @@ export const CATALOG_MENU = [
     { title: 'Угловые диваны', url: '/catalog/uglovye-divany/' },
     { title: 'Модульные диваны и системы', url: '/catalog/modulnye-divany/' },
     { title: 'Диваны-кровати', url: '/catalog/divany-krovati/' },
+    { title: 'Кресла и пуфы', url: '/catalog/kresla/' },
     { title: 'Распродажа образцов', url: '/sale/' },
   ]},
   { title: 'Механизм', items: [

@@ -5,6 +5,8 @@
   "Q-02 наличие и сроки",
   "Q-04 привязка габаритов к моделям",
   "Q-06 ткани и цвета",
+  "Q-08 кресла и пуфы выведены отдельным разделом по решению пользователя 2026-10-13; названия описательные, цены и размеры по запросу",
+  "Q-15 11 фото диванов распределены по моделям по внешнему сходству",
   "Q-15/Q-29 привязка фото",
   "Q-17 has_storage",
   "Q-26 образцы",
@@ -28,6 +30,12 @@
    "name": "Модульные диваны и системы",
    "h1": "Модульные диваны и системы",
    "url": "/catalog/modulnye-divany/"
+  },
+  {
+   "slug": "kresla",
+   "name": "Кресла и пуфы",
+   "h1": "Кресла и пуфы",
+   "url": "/catalog/kresla/"
   }
  ],
  "mechanisms": {
@@ -126,7 +134,8 @@
    "photos": [
     "source/photos/06264b4d-6d4a-4c2d-8f46-81d55c8046cd.jpeg",
     "source/photos/08469ee8-fa14-44ec-8099-1ba77b56bd18.jpeg",
-    "source/photos/ab13c2e7-7bd9-4663-9072-36a95747d4cd.jpeg"
+    "source/photos/ab13c2e7-7bd9-4663-9072-36a95747d4cd.jpeg",
+    "source/photos/d9d49c33-bd44-412f-a17c-8ac3e9669597.jpeg"
    ],
    "samples": [],
    "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
@@ -168,7 +177,9 @@
     "source/photos/2c22df77-be21-4050-a503-4ee8f4a43dff.jpeg",
     "source/photos/19a178e8-8a18-4d86-b873-36f88fefaeae.jpeg",
     "source/photos/155510e9-9471-48b1-a533-2b931c525917.jpeg",
-    "source/photos/3c857c58-fc71-49f0-9815-ff3d7fd3a5be.jpeg"
+    "source/photos/3c857c58-fc71-49f0-9815-ff3d7fd3a5be.jpeg",
+    "source/photos/IMG_20260525_153825.jpg",
+    "source/photos/a23809f1-72f7-41c4-8422-5bea611adfed.jpeg"
    ],
    "samples": [],
    "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
@@ -209,7 +220,8 @@
     "source/photos/6c5205a7-e96a-4b48-a148-243b0e323a11.jpeg",
     "source/photos/7f5b69b2-8346-42cd-be14-e199413481c5.jpeg",
     "source/photos/48a85f33-55fb-4995-b9d2-d4ee08a0f1b3.jpeg",
-    "source/photos/f80c827d-e3de-4b52-87ce-134c3b716c57.jpeg"
+    "source/photos/f80c827d-e3de-4b52-87ce-134c3b716c57.jpeg",
+    "source/photos/e3282af3-df21-4273-a6ca-49af8a4dbde9.jpeg"
    ],
    "samples": [
     {
@@ -257,7 +269,10 @@
     "source/photos/3f991780-2a08-4a1e-b986-e442266de2e4.jpeg",
     "source/photos/e0a8dad9-cb2a-4e77-a47a-6b47e8a601dc.jpeg",
     "source/photos/da3229b5-681b-4b64-a6af-191459bbc641.jpeg",
-    "source/photos/3a591781-22be-462d-8dc3-e84a781248c2.jpeg"
+    "source/photos/3a591781-22be-462d-8dc3-e84a781248c2.jpeg",
+    "source/photos/5c9d5378-c92c-42ed-96e5-bb8af7954479.jpeg",
+    "source/photos/8e766b85-88f6-406a-bb92-e70aae9e3bab.jpeg",
+    "source/photos/eb4e11a2-7858-45cf-8aa9-21da4bab3544.jpeg"
    ],
    "samples": [],
    "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
@@ -299,7 +314,8 @@
     "source/photos/0ae44df5-4f52-4bb4-af4c-774ceff0b3b5.jpeg",
     "source/photos/ab13c2e7-7bd9-4663-9072-36a95747d4cd.jpeg",
     "source/photos/6d13c2e0-d65b-453a-921b-2979c5328f7a.jpeg",
-    "source/photos/d23f86de-4e03-4c3b-b730-8cb0e15e319e.jpeg"
+    "source/photos/d23f86de-4e03-4c3b-b730-8cb0e15e319e.jpeg",
+    "source/photos/f006e764-4aa4-44f6-8d2c-c3924c497966.jpeg"
    ],
    "samples": [],
    "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
@@ -381,7 +397,9 @@
     "source/photos/474bf9ac-4e3e-4a1b-a10a-3f0a80c38438.jpeg",
     "source/photos/bdab2c3d-efef-4a6d-b879-f230d7c13e99.jpeg",
     "source/photos/cee3c1f7-1b5e-447b-b3b1-870f667b778b.jpeg",
-    "source/photos/9bc25952-9422-460b-ba8b-a49994e096f0.jpeg"
+    "source/photos/9bc25952-9422-460b-ba8b-a49994e096f0.jpeg",
+    "source/photos/ff1ca244-d420-4971-8f48-8129013b3900.jpeg",
+    "source/photos/2414b4c2-b78b-48f0-8da3-8d555d2b624e.jpeg"
    ],
    "samples": [
     {
@@ -660,7 +678,8 @@
    ],
    "photos": [
     "source/photos/86d330ff-72d8-4803-9a8a-c16816378a24.jpeg",
-    "source/photos/984ae7aa-7cba-48eb-b843-f93c41cd2ac7.jpeg"
+    "source/photos/984ae7aa-7cba-48eb-b843-f93c41cd2ac7.jpeg",
+    "source/photos/f51a8015-5b78-426b-8af2-fcdd0afa6528.jpeg"
    ],
    "samples": [],
    "construction": "каркас массив хвойных пород и фанера; основание пружинная змейка; наполнитель ППУ 30–35 кг/м³, холлофайбер в подушках спинки; опоры массив бука или металл [ДОПУЩЕНИЕ Q-05]",
@@ -934,6 +953,74 @@
     "секции с механизмом пантограф",
     "угловой модуль",
     "оттоманка"
+   ]
+  },
+  {
+   "length_cm": null,
+   "depth_cm": null,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": false,
+   "price_from": null,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; наполнитель ППУ, холлофайбер в подушке спинки; основание из массива [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18,
+   "tags": [
+    "dlya-gostinoy"
+   ],
+   "id": "kresla/kreslo-na-tsokole",
+   "category": "kresla",
+   "slug": "kreslo-na-tsokole",
+   "name": "Кресло на деревянном цоколе",
+   "type": "Кресло",
+   "h1": "Кресло на деревянном цоколе",
+   "url": "/catalog/kresla/kreslo-na-tsokole/",
+   "model_family": "kreslo-na-tsokole",
+   "photos": [
+    "source/photos/9cdbdc78-621e-48ee-8c3d-e5b338342c7e.jpeg",
+    "source/photos/832749b3-2215-4948-97a2-5b94a182cc47.jpeg",
+    "source/photos/c18ccad2-ad77-4167-b440-6febe2af1f9d.jpeg"
+   ]
+  },
+  {
+   "length_cm": null,
+   "depth_cm": null,
+   "height_cm": null,
+   "seat_height_cm": null,
+   "sleeping": null,
+   "mechanism": "none",
+   "mechanism_name": "без механизма",
+   "has_sleeping_place": false,
+   "has_storage": false,
+   "is_hit": false,
+   "price_from": null,
+   "lead_time_days": "14–21",
+   "in_stock": null,
+   "sides": null,
+   "samples": [],
+   "construction": "каркас массив хвойных пород и фанера; наполнитель ППУ, холлофайбер в подушке спинки; основание из массива [ДОПУЩЕНИЕ Q-05]",
+   "warranty_months": 18,
+   "tags": [
+    "dlya-gostinoy"
+   ],
+   "id": "kresla/kreslo-s-pufom",
+   "category": "kresla",
+   "slug": "kreslo-s-pufom",
+   "name": "Кресло с пуфом",
+   "type": "Кресло",
+   "h1": "Кресло с пуфом",
+   "url": "/catalog/kresla/kreslo-s-pufom/",
+   "model_family": "kreslo-s-pufom",
+   "photos": [
+    "source/photos/07a9cc65-6f86-412b-82ed-718dd17fe63d.jpeg"
    ]
   }
  ],
