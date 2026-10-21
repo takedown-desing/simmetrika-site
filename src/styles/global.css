@@ -510,3 +510,7 @@ h1, h2, h3, .tile-t, .pc-name { text-wrap: balance; }
 .card .ig-scheme { padding: 0; }
 @media (max-width: 760px) { .mech3, .duo { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .bar { grid-template-columns: 104px 1fr 48px; gap: 8px; row-gap: 0; } .bar-n { grid-column: auto; font-size: 13px; line-height: 1.2; } .bar-n i { display: block; font-size: 11px; } .bar-t { height: 14px; } .bar-v { font-size: 13px; } .bar-v i { display: none; } .bars { gap: 6px; } .ig-scheme { padding: 20px 16px; } }
+/* прежние пиктограммы диванов: исходный размер, линии без утолщения */
+.scheme-svg svg.sofa-old { width: 100%; height: auto; max-height: 240px; margin-inline: auto; }
+.scheme-svg svg.sofa-old rect, .scheme-svg svg.sofa-old path { vector-effect: non-scaling-stroke; }
+.card .scheme-svg svg.sofa-old { max-height: 180px; }

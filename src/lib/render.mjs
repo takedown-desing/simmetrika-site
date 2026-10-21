@@ -205,13 +205,7 @@ const body = (x, y, w, h, fill = 'var(--c-photo)') => `<rect x="${x}" y="${y}" w
 const arrow = (x1, y, x2) => `<path d="M${x1} ${y}H${x2}M${x2 - 10} ${y - 7}L${x2} ${y}L${x2 - 10} ${y + 7}" stroke="var(--c-accent)" stroke-width="3" fill="none"/>`;
 const lbl = (x, y, t, a = 'middle', sz = 15) => `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${sz}" fill="currentColor">${esc(t)}</text>`;
 // диван сбоку: спинка + сиденье + подлокотник
-const sideSofa = (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 120, 42)}${body(x + 154, y + 22, 22, 58)}`;
-const MECHS = {
-  pantograf: { t: 'Пантограф', open: (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 70, 42, 'none')}${body(x + 104, y + 46, 120, 34, 'rgba(196,0,5,.12)')}${body(x + 34, y + 46, 70, 34, 'rgba(196,0,5,.12)')}`, note: 'сиденье поднимается и «шагает» вперёд, пол не царапает' },
-  venetsiya: { t: 'Венеция', open: (x, y) => `${body(x + 34, y + 46, 120, 34, 'rgba(196,0,5,.12)')}${body(x + 154, y + 46, 70, 34, 'rgba(196,0,5,.12)')}${body(x, y + 46, 34, 34)}`, note: 'сиденье выдвигается вперёд, спинка ложится в спальное место' },
-  vykatnoy: { t: 'Выкатной', open: (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 120, 42)}${body(x + 154, y + 56, 90, 24, 'rgba(196,0,5,.12)')}`, note: 'нижняя секция выкатывается на колёсиках, компактно' },
-};
-const mechPanel = (m) => `<svg viewBox="0 0 560 170" preserveAspectRatio="xMidYMid meet">${sideSofa(10, 40)}${arrow(200, 80, 270)}${MECHS[m].open(300, 40)}${lbl(95, 150, 'сложен')}${lbl(410, 150, 'разложен')}</svg>`;
+
 function mapWide(withZone = false) {
   // схема без масштаба: Москва в центре, МКАД эллипсом, точки по реальным координатам
   const X = (lon) => 450 + (lon - 37.62) * 1100, Y = (lat) => 175 - (lat - 55.75) * 760;
@@ -223,25 +217,22 @@ function mapWide(withZone = false) {
     ${showrooms.map((s, i) => { const x = X(s.lon), y = Y(s.lat), right = x > 450; return `<g><circle cx="${x}" cy="${y}" r="10" fill="var(--c-accent)"/><text x="${x}" y="${y + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${i + 1}</text>${lbl(x + (right ? 16 : -16), y + 5, s.name.replace(/[«»]/g, '').replace(/, .*/, ''), right ? 'start' : 'end', 13)}</g>`; }).join('')}
   </svg>`;
 }
+// прежние схемы-пиктограммы диванов (как в первой версии сайта), растянуты на ширину блока
+const C0 = 'currentColor';
+const sofa0 = (x, y, w, d, fill = 'var(--c-photo)') => `<rect x="${x}" y="${y}" width="${w}" height="${d}" fill="${fill}" stroke="${C0}" stroke-width="1.5"/>`;
+const MECH_OLD = [['pantograf', 'Пантограф'], ['venetsiya', 'Венеция'], ['vykatnoy', 'Выкатной']];
+function mechOld(active) {
+  const one = (x, label, dim) => `<g transform="translate(${x},0)" ${dim ? 'opacity=".3"' : ''}>${sofa0(10, 40, 120, 30)}${sofa0(10, 20, 120, 20, 'none')}<rect x="10" y="70" width="120" height="14" fill="var(--c-accent)" opacity=".18" stroke="var(--c-accent)"/><text x="70" y="110" text-anchor="middle" font-size="12" fill="${C0}"${dim ? '' : ' font-weight="700"'}>${label}</text></g>`;
+  return `<svg class="sofa-old" viewBox="0 0 450 120" role="img" aria-label="Схема механизмов трансформации">${MECH_OLD.map(([k, t], i) => one(i * 150, t, active && active !== k)).join('')}</svg>`;
+}
 export function schemeSvg(kind = '', attrs = {}, ctx = {}) {
   if (/scale|ruler|sizes|sleeping/.test(kind)) return barsHtml(kind, ctx);
   if (kind === 'color-palette') return paletteHtml(attrs.active);
-  if (kind === 'mechanisms' || kind === 'mechanism-all') {
-    return `<div class="mech3">${Object.keys(MECHS).map((m) => `<figure class="mech"><figcaption><b>${MECHS[m].t}</b> ${MECHS[m].note}</figcaption>${mechPanel(m)}</figure>`).join('')}</div>`;
-  }
-  if (kind.startsWith('mechanism-')) { const m = kind.split('-')[1]; if (MECHS[m]) return `<div class="mech1"><p class="mech1-t"><b>${MECHS[m].t}:</b> ${MECHS[m].note}</p>${mechPanel(m)}</div>`; }
-  if (kind === 'corner-side') {
-    const top = (x, right) => `${body(x, 30, 300, 60)}${body(right ? x + 220 : x, 90, 80, 90)}`;
-    return `<div class="duo"><figure><svg viewBox="0 0 400 220">${top(50, false)}${lbl(200, 212, 'вид стоя лицом к дивану')}</svg><figcaption><b>Левый угол</b> оттоманка слева</figcaption></figure><figure><svg viewBox="0 0 400 220">${top(50, true)}${lbl(200, 212, 'вид стоя лицом к дивану')}</svg><figcaption><b>Правый угол</b> оттоманка справа</figcaption></figure></div>`;
-  }
-  if (kind === 'modules') {
-    const m = [['секция', 140], ['секция', 180], ['угловой модуль', 110], ['оттоманка', 130]];
-    let x = 20;
-    return `<svg class="wide" viewBox="0 0 900 200" role="img" aria-label="Модули модульной системы">${m.map(([t, w], i) => { const g = `${body(x, 40, w, i === 2 ? 110 : 90)}${lbl(x + w / 2, 175, t)}`; x += w + 40; return g; }).join('')}${lbl(880, 30, '+ съёмные подлокотники', 'end', 13)}</svg>`;
-  }
-  if (kind === 'custom-dimensions' || kind === 'room-layout') {
-    return `<svg class="wide" viewBox="0 0 900 220" role="img" aria-label="Размеры, которые можно изменить">${body(150, 40, 520, 110)}${body(150, 40, 520, 30, 'none')}<path d="M150 180H670M150 172v16M670 172v16" stroke="var(--c-accent)" stroke-width="3"/>${lbl(410, 210, 'длина ±30 см с шагом 5 см')}<path d="M700 40V150M692 40h16M692 150h16" stroke="var(--c-accent)" stroke-width="3"/>${lbl(720, 100, 'глубина ±10 см', 'start')}${lbl(410, 105, 'ткань, цвет, сторона угла, опоры', 'middle', 14)}</svg>`;
-  }
+  if (kind === 'mechanisms' || kind === 'mechanism-all') return mechOld(null);
+  if (kind.startsWith('mechanism-')) return mechOld(kind.split('-')[1]);
+  if (kind === 'corner-side') return `<svg class="sofa-old" viewBox="0 0 360 140" role="img" aria-label="Левый и правый угол, вид стоя лицом к дивану"><g>${sofa0(20, 30, 130, 30)}${sofa0(20, 60, 40, 60)}<text x="85" y="135" text-anchor="middle" font-size="12" fill="${C0}">Левый угол</text></g><g>${sofa0(210, 30, 130, 30)}${sofa0(300, 60, 40, 60)}<text x="275" y="135" text-anchor="middle" font-size="12" fill="${C0}">Правый угол</text></g></svg>`;
+  if (kind === 'modules') return `<svg class="sofa-old" viewBox="0 0 400 130" role="img" aria-label="Модули модульной системы">${sofa0(10, 20, 80, 50)}${sofa0(95, 20, 100, 50)}${sofa0(200, 20, 50, 50)}${sofa0(200, 70, 50, 50)}${sofa0(300, 40, 80, 80)}<g font-size="11" fill="${C0}"><text x="50" y="90" text-anchor="middle">секция</text><text x="145" y="90" text-anchor="middle">секция</text><text x="225" y="128" text-anchor="middle">угол</text><text x="340" y="128" text-anchor="middle">оттоманка</text></g></svg>`;
+  if (kind === 'custom-dimensions' || kind === 'room-layout') return `<svg class="sofa-old" viewBox="0 0 430 150" role="img" aria-label="Размеры, которые можно изменить">${sofa0(60, 40, 260, 60)}<path d="M60 120h260M60 115v10M320 115v10" stroke="var(--c-accent)" stroke-width="2"/><text x="190" y="140" text-anchor="middle" font-size="12" fill="${C0}">длина ±30 см</text><path d="M340 40v60M335 40h10M335 100h10" stroke="var(--c-accent)" stroke-width="2"/><text x="350" y="75" font-size="12" fill="${C0}">глубина ±10</text></svg>`;
   if (kind === 'delivery-zones') return `<div class="wide-map">${mapWide(true)}</div>`;
   if (kind === 'showrooms-mkad') return `<div class="wide-map">${mapWide(false)}</div>`;
   return '';
