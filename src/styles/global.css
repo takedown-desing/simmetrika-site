@@ -423,3 +423,55 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (max-width: 900px) { .ymap { grid-template-columns: 1fr; } .ymap-box { min-height: 340px; } }
 .tiles { padding-top: 30px; }
 @media (min-width: 561px) { .pgrid:has(> .pc:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 820px; } }
+
+/* ── v2 правки (21.10): переносы, одинаковые плашки, формы по центру, карточка товара ── */
+p, li, .lede, .hero-lede, .sec-lead { text-wrap: pretty; hyphens: manual; }
+h1, h2, h3, .tile-t, .pc-name { text-wrap: balance; }
+
+/* плашки разделов: одинаковый размер, без «лесенки» */
+.tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 16px; padding-top: 26px; }
+.tiles[data-count="2"], .tiles[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tiles .tile { margin-top: 0 !important; min-height: 0; aspect-ratio: 16 / 9; grid-column: auto !important; }
+.tiles[data-count="2"] .tile, .tiles[data-count="4"] .tile { aspect-ratio: 2 / 1; }
+.tile-t { font-size: clamp(20px, 2vw, 28px); padding: 24px 28px; max-width: 70%; }
+.tile-n { left: 0; top: -24px; font-size: 14px; }
+.tile-img { width: 60%; }
+.tile-sale { width: 76px; height: 76px; right: 20px; bottom: 20px; font-size: 15px; }
+@media (max-width: 1000px) { .tiles, .tiles[data-count] { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tiles .tile, .tiles[data-count] .tile { aspect-ratio: 16 / 10; } }
+@media (max-width: 600px) { .tiles, .tiles[data-count] { grid-template-columns: 1fr; gap: 40px; } .tiles .tile, .tiles[data-count] .tile { aspect-ratio: 16 / 9; } .tile-t { font-size: 22px; } }
+
+/* формы обратной связи — по центру везде */
+.lead-form { margin-inline: auto; width: 100%; }
+.lead-form .lf-t, .lead-form .lf-l { text-align: center; }
+.lead-form .btn[type="submit"] { justify-self: center; min-width: 240px; }
+.lead-form .fld-check { justify-content: center; }
+.lf-ok { text-align: center; }
+.cart-sum .lead-form .lf-t, .cart-sum .lead-form .btn[type="submit"] { justify-self: stretch; }
+.home-sec .sec-body > .lead-form { margin-top: 8px; }
+
+/* карточка товара: галерея «липкая», без пустоты под фото */
+.pp { align-items: start; }
+@media (min-width: 901px) { .gal { position: sticky; top: 96px; } }
+.pdesc > h2 { margin-bottom: 26px; }
+.kspec { list-style: none; padding: 0 !important; margin: 0 0 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.kspec li { background: var(--c-panel); padding: 18px 18px 16px; margin: 0; display: grid; gap: 4px; align-content: start; }
+.kspec-ico { width: 30px; height: 30px; color: var(--c-accent); margin-bottom: 6px; } .kspec-ico svg { width: 30px; height: 30px; }
+.kspec-l { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--c-ink-2); }
+.kspec b { font-size: 17px; font-weight: 500; }
+.pdesc-intro { max-width: 820px; font-size: 17px; margin-bottom: 26px; }
+.pdesc-intro ul { padding-left: 1.2em; }
+.feat { list-style: none; padding: 0 !important; margin: 0 0 26px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.feat li { background: #fff; border: 1px solid var(--c-line); border-left: 3px solid var(--c-accent); padding: 20px 22px; margin: 0; display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: start; }
+.feat-n { grid-row: span 2; font-size: 26px; font-weight: 300; color: var(--c-accent); line-height: 1; }
+.feat b { font-size: 17px; font-weight: 500; } .feat p { margin: 4px 0 0; color: var(--c-ink-2); font-size: 15px; }
+.feat li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.pdesc-cards .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.pdesc-cards .card { padding: 24px 26px 12px; }
+.pdesc-cards .card > :last-child { margin-bottom: 12px; }
+@media (max-width: 700px) { .feat, .pdesc-cards .cards { grid-template-columns: 1fr; } .feat li:last-child:nth-child(odd) { grid-column: auto; } }
+.buy-more { margin-top: 22px; font-size: 14px; color: var(--c-ink-2); } .buy-more a { color: var(--c-ink); text-decoration-color: var(--c-accent); text-underline-offset: 3px; }
+.pp { padding-bottom: 32px; }
+.sec > .kspec, .sec > .feat { max-width: none; }
+.kspec { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.prose a.tile, .prose a.tile:hover { color: #fff; text-decoration: none; }
+.prose a.tile .tile-n { color: #888; }

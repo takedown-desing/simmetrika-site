@@ -26,7 +26,7 @@ const cats = [
   ['Модульные системы', '/catalog/modulnye-divany/', 'modular'], ['Диваны-кровати', '/catalog/divany-krovati/', 'bed'],
   ['Распродажа образцов', '/sale/', 'sale'], ['Диваны на заказ', '/na-zakaz/', 'ruler'],
 ];
-const kind = (t) => /^Каталог/.test(t) ? 'catalog' : /Распродажа/.test(t) ? 'panel' : /Почему|что производим/.test(t) ? 'cards' : /под ваш размер/.test(t) ? 'dark' : /шоурум/i.test(t) ? 'panel' : /Задать вопрос/.test(t) ? 'panel' : 'plain';
+const kind = (t0) => { const t = t0.replace(/\u00a0|&nbsp;|&#xA0;|&#160;/gi, ' '); return /^Каталог/.test(t) ? 'catalog' : /Распродажа/.test(t) ? 'panel' : /Почему|что производим/.test(t) ? 'cards' : /под ваш размер/.test(t) ? 'dark' : /шоурум/i.test(t) ? 'panel' : /Задать вопрос/.test(t) ? 'panel' : 'plain'; };
 const body = (s) => { const h = inner(s.html); return h.replace(/<h2[^>]*>[\s\S]*?<\/h2>/, ''); };
 const lead = (h) => { const m = h.match(/^\s*(<p>[\s\S]*?<\/p>)/); return m ? [m[1], h.slice(m[0].length)] : ['', h]; };
 const schema = graph(page, { faq: d.faq, type: 'home' });

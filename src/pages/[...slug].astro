@@ -9,7 +9,7 @@ import { graph } from '../lib/schema.mjs';
 import { u } from '../lib/site.mjs';
 import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
 import { picture, productCard, showroomsHtml, cartPayload, esc } from '../lib/render.mjs';
-import { cardifySections as cardify } from '../lib/layout.mjs';
+import { cardifySections as cardify, cardify as cardifyOne } from '../lib/layout.mjs';
 
 export function getStaticPaths() {
   const SKIP = new Set(['ui', 'error']);
@@ -28,12 +28,34 @@ const crumbs = p
   : d.breadcrumbs || [{ name: 'Главная', url: '/' }, { name: d.h1, url: d.url }];
 
 // товар
-let descHtml = '', similar = [], family = [];
+let descIntro = '', descCards = '', similar = [], family = [];
 if (p) {
-  descHtml = renderMd(d.description_md || page.body);
+  const rawDesc = (d.description_md || page.body || '').replace(/^##\s+[^\n]*\n+/, ''); // H2 «Описание модели …» в теле дублирует заголовок секции
+  const html = renderMd(rawDesc);
+  const i3 = html.search(/<h3 id=/);
+  descIntro = i3 < 0 ? html : html.slice(0, i3);
+  descCards = i3 < 0 ? '' : cardifyOne(html.slice(i3), { force: true });
   similar = select(`category=${p.category}`).filter((x) => x.id !== p.id).slice(0, 3);
   family = products.filter((x) => x.model_family === p.model_family && x.id !== p.id);
 }
+const IC = {
+  size: '<svg viewBox="0 0 24 24"><path d="M3 9h18v8H3zM3 13h18M7 9V6h10v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  bed: '<svg viewBox="0 0 24 24"><path d="M3 18V8M3 14h18v4M21 18v-4M7 11h4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  mech: '<svg viewBox="0 0 24 24"><path d="M4 16h16M5 16c0-3 1-5 3-5h8c2 0 3 2 3 5M9 7l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  box: '<svg viewBox="0 0 24 24"><path d="M4 8h16v11H4zM4 8l2-4h12l2 4M9 12h6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  fabric: '<svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  time: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  shield: '<svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+};
+const keySpecs = p ? [
+  { ico: IC.size, label: 'Габариты, Д×Г×В', value: sizeStr(p) },
+  { ico: IC.bed, label: 'Спальное место', value: p.sleeping ? `${p.sleeping.w}×${p.sleeping.l} см` : 'нет' },
+  { ico: IC.mech, label: 'Механизм', value: p.mechanism_name },
+  ...(p.category === 'kresla' ? [] : [{ ico: IC.box, label: 'Ящик для белья', value: p.has_storage ? 'есть' : 'нет' }]),
+  { ico: IC.fabric, label: 'Обивка', value: '3 ткани, 10 цветов' },
+  { ico: IC.time, label: 'Изготовление', value: p.in_stock ? `в наличии, ${settings.delivery.in_stock_days} дня` : `${settings.delivery.made_to_order_days} дней` },
+  { ico: IC.shield, label: 'Гарантия', value: `${p.warranty_months} месяцев` },
+] : [];
 const bodyHtml = !isProduct && !isCart ? cardify(renderMd(page.body)) : '';
 const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
 const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
@@ -61,20 +83,17 @@ const fab = Object.values(MATERIAL);
         <p class={`stock ${p.in_stock ? '' : 'is-order'}`}>{p.in_stock ? `В наличии: ${MATERIAL[p.in_stock.material].name.toLowerCase()}, ${COLOR_NAME[p.in_stock.color]}. Доставка ${settings.delivery.in_stock_days} дня` : `Под заказ, изготовление ${settings.delivery.made_to_order_days} дней`}</p>
         <div class="buy-btns"><button type="button" class="btn btn-accent" data-add-product>Добавить в заявку</button><button type="button" class="btn btn-line" data-oneclick>Заказать в один клик</button></div>
         {p.samples?.length > 0 && <p class="blk-note" style="margin-top:18px">Выставочный образец со скидкой {p.samples[0].discount_pct}% стоит в шоуруме {SHOWROOM[p.samples[0].showroom].name}: {rub(p.samples[0].sample_price)} вместо {rub(p.samples[0].old_price)}. <a href={u('/sale/')}>Все образцы</a></p>}
-        <dl class="mini">
-          <div><dt>Габариты, Д×Г×В</dt><dd>{sizeStr(p)}</dd></div>
-          <div><dt>Спальное место</dt><dd>{sleepStr(p)}</dd></div>
-          <div><dt>Механизм</dt><dd>{p.mechanism_name}</dd></div>
-          {p.seat_height_cm && <div><dt>Высота посадки</dt><dd>{p.seat_height_cm} см</dd></div>}
-          <div><dt>Ящик для белья</dt><dd>{p.has_storage ? 'есть' : 'нет'}</dd></div>
-          <div><dt>Гарантия</dt><dd>{p.warranty_months} месяцев</dd></div>
-        </dl>
+        <p class="buy-more"><a href="#opisanie">Характеристики и описание</a> · <a href={u('/dostavka/')}>Доставка и оплата</a></p>
       </div>
     </div>
     <div class="wrap prose">
-      <section class="sec"><h2>Описание</h2>
-        {d.features?.length > 0 && <ul class="feat">{d.features.map((f) => <li>{typeof f === 'string' ? f : `${f.title ?? ''} ${f.text ?? ''}`}</li>)}</ul>}
-        <Fragment set:html={descHtml} />
+      <section class="sec pdesc" id="opisanie"><h2>Описание</h2>
+        <ul class="kspec" aria-label="Ключевые характеристики">
+          {keySpecs.map((k) => <li><span class="kspec-ico" set:html={k.ico} /><span class="kspec-l">{k.label}</span><b>{k.value}</b></li>)}
+        </ul>
+        <div class="pdesc-intro" set:html={descIntro} />
+        {d.features?.length > 0 && <ul class="feat">{d.features.map((f, i) => <li><span class="feat-n">{String(i + 1).padStart(2, '0')}</span>{typeof f === 'string' ? <p>{f}</p> : <><b>{f.title}</b><p>{f.text}</p></>}</li>)}</ul>}
+        {descCards && <div class="pdesc-cards" set:html={descCards} />}
       </section>
       <section class="sec"><h2>Характеристики</h2>
         <div class="tbl"><table><tbody>

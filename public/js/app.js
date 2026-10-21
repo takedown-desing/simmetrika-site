@@ -3,7 +3,7 @@
   const KEY = 'simmetrika_lead_v1';
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const rub = (n) => Math.round(n).toLocaleString('ru-RU').replace(/ /g, ' ') + ' ₽';
+  const rub = (n) => Math.round(n).toLocaleString('ru-RU').replace(/[\u00a0\u202f ]/g, '\u00a0') + '\u00a0₽';
   const MAT = { velyur: 'велюр', rogozhka: 'рогожка', zhakkard: 'жаккард' };
   const COLORS = { seryy: 'серый', bezhevyy: 'бежевый', zelenyy: 'зелёный', siniy: 'синий', belyy: 'белый', korichnevyy: 'коричневый', zheltyy: 'жёлтый', terrakot: 'терракотовый', bordovyy: 'бордовый', rozovyy: 'розовый' };
 
@@ -88,7 +88,9 @@
     const upd = () => { if (P.base) $('[data-price]').textContent = rub(price()); };
     const press = (box, btn) => { $$('button', box).forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')); };
     const colorsBox = $('[data-colors-box]');
-    const bindColors = () => $$('button', colorsBox).forEach((b) => b.addEventListener('click', () => { press(colorsBox, b); st.color = b.dataset.v; $('[data-color-name]').textContent = b.dataset.n; }));
+    // адрес варианта: ?material=&color=&side= (canonical остаётся на чистом URL товара, дубля нет)
+    const syncUrl = () => { const q = new URLSearchParams(); q.set('material', st.material); if (st.color) q.set('color', st.color); if (st.side) q.set('side', st.side); history.replaceState(null, '', location.pathname + '?' + q.toString()); };
+    const bindColors = () => $$('button', colorsBox).forEach((b) => b.addEventListener('click', () => { press(colorsBox, b); st.color = b.dataset.v; $('[data-color-name]').textContent = b.dataset.n; syncUrl(); }));
     bindColors();
     const hex = Object.fromEntries($$('button', colorsBox).map((b) => [b.dataset.v, getComputedStyle(b).getPropertyValue('--sw')]));
     const HEX = { seryy: '#8E9096', bezhevyy: '#D8C7AE', zelenyy: '#4E7A5A', siniy: '#2F4A73', belyy: '#F1EFEA', korichnevyy: '#6E4E3A', zheltyy: '#D9A33A', terrakot: '#B65A3A', bordovyy: '#7A1E2B', rozovyy: '#D9A3A6', ...hex };
@@ -97,9 +99,16 @@
       const cs = b.dataset.colors.split(',');
       if (!cs.includes(st.color)) st.color = cs[0];
       colorsBox.innerHTML = cs.map((c) => `<button type="button" style="--sw:${HEX[c]}" data-v="${c}" data-n="${COLORS[c]}" aria-pressed="${c === st.color}" aria-label="${COLORS[c]}"></button>`).join('');
-      $('[data-color-name]').textContent = COLORS[st.color]; bindColors();
+      $('[data-color-name]').textContent = COLORS[st.color]; bindColors(); syncUrl();
     }));
-    $$('[data-side] button').forEach((b) => b.addEventListener('click', () => { press($('[data-side]'), b); st.side = b.dataset.v; }));
+    $$('[data-side] button').forEach((b) => b.addEventListener('click', () => { press($('[data-side]'), b); st.side = b.dataset.v; syncUrl(); }));
+    // открыть вариант из ссылки
+    const q0 = new URLSearchParams(location.search);
+    if (q0.has('material') || q0.has('color') || q0.has('side')) {
+      $(`[data-material] button[data-v="${q0.get('material')}"]`)?.click();
+      if (q0.get('color')) $(`[data-colors-box] button[data-v="${q0.get('color')}"]`)?.click();
+      if (q0.get('side')) $(`[data-side] button[data-v="${q0.get('side')}"]`)?.click();
+    }
     const item = () => ({ id: P.id, name: P.name, url: P.url, img: P.img, material: st.material, color: st.color, side: st.side, price: price() });
     $$('[data-add-product]').forEach((b) => b.addEventListener('click', () => addItem(item())));
     $$('[data-oneclick]').forEach((b) => b.addEventListener('click', () => openModal('one_click', item())));

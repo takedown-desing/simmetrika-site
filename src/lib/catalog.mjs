@@ -19,7 +19,7 @@ export const CATEGORY = Object.fromEntries(CAT.categories.map((c) => [c.slug, c]
 export const MECH = CAT.mechanisms;
 export const SHOWROOM = Object.fromEntries(CAT.showrooms.map((s) => [s.slug, s]));
 export const img = (src) => (src && IMG[src]) || null;
-export const rub = (n) => (n == null ? '' : Math.round(n).toLocaleString('ru-RU').replace(/ /g, ' ') + ' ₽');
+export const rub = (n) => (n == null ? '' : Math.round(n).toLocaleString('ru-RU').replace(/[\u00a0\u202f ]/g, '\u00a0') + '\u00a0₽');
 export const variantPrice = (p, material = 'rogozhka') => (p.price_from ? Math.round((p.price_from * (MATERIAL[material]?.price_k || 1)) / 100) * 100 : null);
 export const priceText = (p, material = 'rogozhka', from = true) => (p.price_from ? `${from ? 'от ' : ''}${rub(variantPrice(p, material))}` : 'цена по запросу');
 export const productColors = () => Object.keys(COLOR_HEX).filter((c) => CAT.fabrics.some((f) => f.colors.includes(c)));
