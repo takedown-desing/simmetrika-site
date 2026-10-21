@@ -56,7 +56,7 @@ const keySpecs = p ? [
   { ico: IC.time, label: 'Изготовление', value: p.in_stock ? `в наличии, ${settings.delivery.in_stock_days} дня` : `${settings.delivery.made_to_order_days} дней` },
   { ico: IC.shield, label: 'Гарантия', value: `${p.warranty_months} месяцев` },
 ] : [];
-const bodyHtml = !isProduct && !isCart ? cardify(renderMd(page.body)) : '';
+const bodyHtml = !isProduct && !isCart ? cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
 const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
 const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
 const ui = d.ui_texts || {};

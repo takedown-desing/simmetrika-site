@@ -2,7 +2,7 @@
 import { u } from './site.mjs';
 import {
   products, showrooms, settings, fabrics, COLOR_HEX, COLOR_NAME, MATERIAL, CATEGORY, MECH, SHOWROOM,
-  img, rub, variantPrice, priceText, sizeStr, sleepStr, bestSample, select, minPrice, parseRule, productColors,
+  img, rub, variantPrice, priceText, sizeStr, sleepStr, bestSample, select, minPrice, parseRule, matchRule, productColors,
 } from './catalog.mjs';
 import { byUrl, loadPages, titleOf } from './content.mjs';
 
@@ -109,14 +109,6 @@ export function mapHtml() {
     <ol class="ymap-legend">${showrooms.map((s) => `<li><a href="${ymapPoint(s)}" target="_blank" rel="noopener"><b>${esc(s.name)}</b><span>${esc(s.address)}</span></a></li>`).join('')}</ol>
   </figure>`;
 }
-export function mapSvg() {
-  const pts = [[140, 70], [255, 120], [185, 55], [95, 175], [230, 205]];
-  return `<figure class="map"><svg viewBox="0 0 360 260" role="img" aria-label="Схема расположения шоурумов относительно МКАД">
-    <ellipse cx="180" cy="130" rx="120" ry="95" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/>
-    <text x="180" y="134" text-anchor="middle" font-size="12" fill="currentColor" opacity=".6">Москва, МКАД</text>
-    ${showrooms.map((s, i) => `<g><circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="7" fill="var(--c-accent)"/><text x="${pts[i][0] + 11}" y="${pts[i][1] + 4}" font-size="11" fill="currentColor">${esc(s.name.split(',')[0].replace(/[«»]/g, ''))}</text></g>`).join('')}
-  </svg><figcaption>Схема без масштаба. Точные адреса и ссылки на карту в карточках шоурумов.</figcaption></figure>`;
-}
 
 export function swatches(materials = 'velyur,rogozhka,zhakkard') {
   return `<div class="sw-wrap">${materials.split(',').map((m) => MATERIAL[m.trim()]).filter(Boolean).map((f) => `<div class="sw-row">
@@ -188,24 +180,70 @@ export function promoHtml() {
   return `<div class="promo">${promos.map((p) => `<a class="promo-i" href="${u(p.data.url)}"><span class="promo-t">${esc(p.data.h1)}</span><span class="promo-a">${esc(p.data.announce || '')}</span><span class="btn btn-sm btn-white">Подробнее</span></a>`).join('')}</div>`;
 }
 
-// ── схемы-инфографики (упрощённые SVG; подписи из текста директивы идут под схемой) ──
-export function schemeSvg(kind = '', attrs = {}) {
-  const C = 'currentColor';
-  const sofa = (x, y, w, d, fill = 'var(--c-photo)') => `<rect x="${x}" y="${y}" width="${w}" height="${d}" fill="${fill}" stroke="${C}" stroke-width="1.5"/>`;
-  if (kind.startsWith('mechanism')) {
-    const one = (x, label, open) => `<g transform="translate(${x},0)">${sofa(10, 40, 120, 30)}${sofa(10, 20, 120, 20, 'none')}<rect x="10" y="${open ? 70 : 70}" width="${open}" height="14" fill="var(--c-accent)" opacity=".18" stroke="var(--c-accent)"/><text x="70" y="110" text-anchor="middle" font-size="12" fill="${C}">${label}</text></g>`;
-    const list = kind === 'mechanism-pantograf' ? [['Пантограф: сиденье вперёд и вниз', 120]] : kind === 'mechanism-venetsiya' ? [['Венеция: сиденье вперёд, спинка вниз', 120]] : kind === 'mechanism-vykatnoy' ? [['Выкатной: нижняя секция выкатывается', 120]] : [['Пантограф', 120], ['Венеция', 120], ['Выкатной', 120]];
-    return `<svg viewBox="0 0 ${list.length * 150} 120" role="img" aria-label="Схема механизмов трансформации">${list.map((l, i) => one(i * 150, l[0], l[1])).join('')}</svg>`;
+// ── схемы-инфографики: на всю ширину блока (HTML-графики и широкие SVG); подписи из текста директивы идут под схемой ──
+const sofaDim = (p) => [p.name, p.category === 'uglovye-divany' ? 'угловой' : p.category === 'modulnye-divany' ? 'модульный' : 'прямой'];
+function barsHtml(kind, ctx = {}) {
+  const sleep = /sleeping/.test(kind);
+  let list = products.filter((p) => p.category !== 'kresla' && (sleep ? p.sleeping : p.length_cm));
+  if (ctx.category && ctx.category !== 'kresla' && list.some((p) => p.category === ctx.category)) list = list.filter((p) => p.category === ctx.category);
+  if (ctx.rule && Object.keys(ctx.rule).length) { const r = Object.entries(ctx.rule).map(([k, v]) => `${k}=${v}`).join(','); const f = list.filter((p) => matchRule(p, r)); if (f.length >= 2) list = f; }
+  const val = (p) => (sleep ? p.sleeping.l : p.length_cm);
+  list = list.slice().sort((a, b) => val(a) - val(b));
+  const max = Math.max(...list.map(val)), min = Math.min(...list.map(val));
+  const cats = [...new Set(list.map((p) => p.category))];
+  const unit = sleep ? 'длина спального места, см' : 'длина дивана, см';
+  return `<div class="bars" role="img" aria-label="${esc(unit)}">
+    <p class="bars-cap">${esc(unit[0].toUpperCase() + unit.slice(1))}: от ${min} до ${max}</p>
+    ${list.map((p) => { const [n, t] = sofaDim(p); return `<a class="bar bar-${p.category}" href="${u(p.url)}"><span class="bar-n">${esc(n)} <i>${t}</i></span><span class="bar-t"><span class="bar-f" style="width:${Math.max(8, (val(p) / max) * 100).toFixed(1)}%"></span></span><b class="bar-v">${val(p)}${sleep ? ` <i>×${p.sleeping.w}</i>` : ''}</b></a>`; }).join('')}
+    ${cats.length > 1 ? `<p class="bars-leg">${cats.map((c) => `<span class="bar-${c}"><i></i>${esc(CATEGORY[c].name)}</span>`).join('')}</p>` : ''}
+  </div>`;
+}
+function paletteHtml(active) {
+  return `<div class="pal">${Object.entries(COLOR_HEX).map(([k, v]) => `<a class="pal-i ${k === active ? 'is-on' : ''}" href="${u(`/catalog/cvet/${k}/`)}"><span style="background:${v}"></span><b>${esc(COLOR_NAME[k])}</b><i>${esc(fabrics.filter((f) => f.colors.includes(k)).map((f) => f.name.toLowerCase()).join(', '))}</i></a>`).join('')}</div>`;
+}
+const body = (x, y, w, h, fill = 'var(--c-photo)') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="currentColor" stroke-width="2"/>`;
+const arrow = (x1, y, x2) => `<path d="M${x1} ${y}H${x2}M${x2 - 10} ${y - 7}L${x2} ${y}L${x2 - 10} ${y + 7}" stroke="var(--c-accent)" stroke-width="3" fill="none"/>`;
+const lbl = (x, y, t, a = 'middle', sz = 15) => `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${sz}" fill="currentColor">${esc(t)}</text>`;
+// диван сбоку: спинка + сиденье + подлокотник
+const sideSofa = (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 120, 42)}${body(x + 154, y + 22, 22, 58)}`;
+const MECHS = {
+  pantograf: { t: 'Пантограф', open: (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 70, 42, 'none')}${body(x + 104, y + 46, 120, 34, 'rgba(196,0,5,.12)')}${body(x + 34, y + 46, 70, 34, 'rgba(196,0,5,.12)')}`, note: 'сиденье поднимается и «шагает» вперёд, пол не царапает' },
+  venetsiya: { t: 'Венеция', open: (x, y) => `${body(x + 34, y + 46, 120, 34, 'rgba(196,0,5,.12)')}${body(x + 154, y + 46, 70, 34, 'rgba(196,0,5,.12)')}${body(x, y + 46, 34, 34)}`, note: 'сиденье выдвигается вперёд, спинка ложится в спальное место' },
+  vykatnoy: { t: 'Выкатной', open: (x, y) => `${body(x, y, 34, 80)}${body(x + 34, y + 38, 120, 42)}${body(x + 154, y + 56, 90, 24, 'rgba(196,0,5,.12)')}`, note: 'нижняя секция выкатывается на колёсиках, компактно' },
+};
+const mechPanel = (m) => `<svg viewBox="0 0 560 170" preserveAspectRatio="xMidYMid meet">${sideSofa(10, 40)}${arrow(200, 80, 270)}${MECHS[m].open(300, 40)}${lbl(95, 150, 'сложен')}${lbl(410, 150, 'разложен')}</svg>`;
+function mapWide(withZone = false) {
+  // схема без масштаба: Москва в центре, МКАД эллипсом, точки по реальным координатам
+  const X = (lon) => 450 + (lon - 37.62) * 1100, Y = (lat) => 175 - (lat - 55.75) * 760;
+  const cx = 450, cy = 175, rx = 242, ry = 129;
+  return `<svg viewBox="0 0 900 350" role="img" aria-label="Шоурумы SIMMETRIKA относительно МКАД">
+    ${withZone ? `<ellipse cx="${cx}" cy="${cy}" rx="420" ry="162" fill="rgba(196,0,5,.04)" stroke="var(--c-accent)" stroke-width="1.5" stroke-dasharray="6 6"/>${lbl(890, 26, 'Московская область до 60 км от МКАД', 'end', 13)}${lbl(890, 44, '1 500 ₽ + 40 ₽ за км', 'end', 13)}` : ''}
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${withZone ? 'rgba(196,0,5,.07)' : 'rgba(0,0,0,.03)'}" stroke="currentColor" stroke-width="2" opacity=".7"/>
+    ${lbl(cx, cy - 6, withZone ? 'В пределах МКАД' : 'Москва', 'middle', 14)}${withZone ? lbl(cx, cy + 14, '1 500 ₽', 'middle', 14) : lbl(cx, cy + 14, 'МКАД', 'middle', 13)}
+    ${showrooms.map((s, i) => { const x = X(s.lon), y = Y(s.lat), right = x > 450; return `<g><circle cx="${x}" cy="${y}" r="10" fill="var(--c-accent)"/><text x="${x}" y="${y + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${i + 1}</text>${lbl(x + (right ? 16 : -16), y + 5, s.name.replace(/[«»]/g, '').replace(/, .*/, ''), right ? 'start' : 'end', 13)}</g>`; }).join('')}
+  </svg>`;
+}
+export function schemeSvg(kind = '', attrs = {}, ctx = {}) {
+  if (/scale|ruler|sizes|sleeping/.test(kind)) return barsHtml(kind, ctx);
+  if (kind === 'color-palette') return paletteHtml(attrs.active);
+  if (kind === 'mechanisms' || kind === 'mechanism-all') {
+    return `<div class="mech3">${Object.keys(MECHS).map((m) => `<figure class="mech"><figcaption><b>${MECHS[m].t}</b> ${MECHS[m].note}</figcaption>${mechPanel(m)}</figure>`).join('')}</div>`;
   }
-  if (kind === 'corner-side') return `<svg viewBox="0 0 360 140" role="img" aria-label="Левый и правый угол, вид стоя лицом к дивану"><g>${sofa(20, 30, 130, 30)}${sofa(20, 60, 40, 60)}<text x="85" y="135" text-anchor="middle" font-size="12" fill="${C}">Левый угол</text></g><g>${sofa(210, 30, 130, 30)}${sofa(300, 60, 40, 60)}<text x="275" y="135" text-anchor="middle" font-size="12" fill="${C}">Правый угол</text></g></svg>`;
-  if (kind === 'color-palette') return `<svg viewBox="0 0 400 70" role="img" aria-label="Цветовые группы обивки">${Object.entries(COLOR_HEX).map(([k, v], i) => `<circle cx="${20 + i * 40}" cy="30" r="${k === attrs.active ? 17 : 13}" fill="${v}" stroke="${k === attrs.active ? 'var(--c-accent)' : '#ccc'}" stroke-width="${k === attrs.active ? 3 : 1}"/>`).join('')}<text x="200" y="66" text-anchor="middle" font-size="11" fill="${C}">10 цветовых групп обивки</text></svg>`;
-  if (/scale|ruler|sizes|sleeping/.test(kind)) {
-    const list = products.slice().sort((a, b) => a.length_cm - b.length_cm).filter((p, i, a) => a.findIndex((q) => q.name === p.name && q.category === p.category) === i).slice(0, 10);
-    const max = Math.max(...list.map((p) => p.length_cm));
-    return `<svg viewBox="0 0 420 ${list.length * 24 + 10}" role="img" aria-label="Длина моделей, см">${list.map((p, i) => `<text x="0" y="${i * 24 + 16}" font-size="11" fill="${C}">${esc(p.name)}${p.category === 'uglovye-divany' ? ' угл.' : p.category === 'modulnye-divany' ? ' мод.' : ''}</text><rect x="110" y="${i * 24 + 5}" width="${(p.length_cm / max) * 260}" height="14" fill="${p.category === 'uglovye-divany' ? 'var(--c-accent)' : '#8E9096'}" opacity=".75"/><text x="${115 + (p.length_cm / max) * 260}" y="${i * 24 + 16}" font-size="11" fill="${C}">${p.length_cm}</text>`).join('')}</svg>`;
+  if (kind.startsWith('mechanism-')) { const m = kind.split('-')[1]; if (MECHS[m]) return `<div class="mech1"><p class="mech1-t"><b>${MECHS[m].t}:</b> ${MECHS[m].note}</p>${mechPanel(m)}</div>`; }
+  if (kind === 'corner-side') {
+    const top = (x, right) => `${body(x, 30, 300, 60)}${body(right ? x + 220 : x, 90, 80, 90)}`;
+    return `<div class="duo"><figure><svg viewBox="0 0 400 220">${top(50, false)}${lbl(200, 212, 'вид стоя лицом к дивану')}</svg><figcaption><b>Левый угол</b> оттоманка слева</figcaption></figure><figure><svg viewBox="0 0 400 220">${top(50, true)}${lbl(200, 212, 'вид стоя лицом к дивану')}</svg><figcaption><b>Правый угол</b> оттоманка справа</figcaption></figure></div>`;
   }
-  if (kind === 'delivery-zones' || kind === 'showrooms-mkad') return mapSvg().replace(/<\/?figure[^>]*>|<figcaption>.*<\/figcaption>/g, '');
-  if (kind === 'modules') return `<svg viewBox="0 0 400 130" role="img" aria-label="Модули модульной системы">${sofa(10, 20, 80, 50)}${sofa(95, 20, 100, 50)}${sofa(200, 20, 50, 50)}${sofa(200, 70, 50, 50)}${sofa(300, 40, 80, 80)}<g font-size="11" fill="${C}"><text x="50" y="90" text-anchor="middle">секция</text><text x="145" y="90" text-anchor="middle">секция</text><text x="225" y="128" text-anchor="middle">угол</text><text x="340" y="128" text-anchor="middle">оттоманка</text></g></svg>`;
-  if (kind === 'custom-dimensions' || kind === 'room-layout') return `<svg viewBox="0 0 400 150" role="img" aria-label="Размеры, которые можно изменить">${sofa(60, 40, 260, 60)}<path d="M60 120h260M60 115v10M320 115v10" stroke="var(--c-accent)" stroke-width="2"/><text x="190" y="140" text-anchor="middle" font-size="12" fill="${C}">длина ±30 см</text><path d="M340 40v60M335 40h10M335 100h10" stroke="var(--c-accent)" stroke-width="2"/><text x="350" y="75" font-size="12" fill="${C}">глубина ±10</text></svg>`;
+  if (kind === 'modules') {
+    const m = [['секция', 140], ['секция', 180], ['угловой модуль', 110], ['оттоманка', 130]];
+    let x = 20;
+    return `<svg class="wide" viewBox="0 0 900 200" role="img" aria-label="Модули модульной системы">${m.map(([t, w], i) => { const g = `${body(x, 40, w, i === 2 ? 110 : 90)}${lbl(x + w / 2, 175, t)}`; x += w + 40; return g; }).join('')}${lbl(880, 30, '+ съёмные подлокотники', 'end', 13)}</svg>`;
+  }
+  if (kind === 'custom-dimensions' || kind === 'room-layout') {
+    return `<svg class="wide" viewBox="0 0 900 220" role="img" aria-label="Размеры, которые можно изменить">${body(150, 40, 520, 110)}${body(150, 40, 520, 30, 'none')}<path d="M150 180H670M150 172v16M670 172v16" stroke="var(--c-accent)" stroke-width="3"/>${lbl(410, 210, 'длина ±30 см с шагом 5 см')}<path d="M700 40V150M692 40h16M692 150h16" stroke="var(--c-accent)" stroke-width="3"/>${lbl(720, 100, 'глубина ±10 см', 'start')}${lbl(410, 105, 'ткань, цвет, сторона угла, опоры', 'middle', 14)}</svg>`;
+  }
+  if (kind === 'delivery-zones') return `<div class="wide-map">${mapWide(true)}</div>`;
+  if (kind === 'showrooms-mkad') return `<div class="wide-map">${mapWide(false)}</div>`;
   return '';
 }
+export function mapSvg() { return `<figure class="map">${mapWide(false)}</figure>`; }

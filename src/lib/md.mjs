@@ -46,7 +46,7 @@ function remarkDirectives(ctx = {}) {
         case 'scheme': {
           data.hName = 'figure';
           data.hProperties = { className: ['ig', 'ig-scheme'], ...idAttr };
-          const svg = R.schemeSvg(a.kind, a);
+          const svg = R.schemeSvg(a.kind, a, ctx);
           if (svg) node.children.unshift(html(`<div class="scheme-svg">${svg}</div>`));
           if (a.title) node.children.unshift({ type: 'paragraph', data: { hProperties: { className: ['ig-title'] } }, children: [{ type: 'text', value: a.title }] });
           return;

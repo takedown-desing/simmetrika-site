@@ -475,3 +475,38 @@ h1, h2, h3, .tile-t, .pc-name { text-wrap: balance; }
 .kspec { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .prose a.tile, .prose a.tile:hover { color: #fff; text-decoration: none; }
 .prose a.tile .tile-n { color: #888; }
+
+/* ── инфографика на всю ширину блока (21.10) ── */
+.scheme-svg { width: 100%; }
+.scheme-svg svg { width: 100%; height: auto; max-height: none; display: block; color: var(--c-ink); }
+.ig-scheme { padding: 28px 32px; }
+.bars { display: grid; gap: 8px; }
+.bars-cap { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--c-ink-2); margin: 0 0 6px; }
+.bar { display: grid; grid-template-columns: minmax(130px, 220px) 1fr 70px; align-items: center; gap: 14px; text-decoration: none !important; color: var(--c-ink) !important; }
+.bar-n { font-size: 15px; } .bar-n i { font-style: normal; color: var(--c-ink-2); font-size: 13px; }
+.bar-t { height: 18px; background: #fff; display: block; }
+.bar-f { display: block; height: 100%; background: #8e9096; transition: background .15s; }
+.bar-uglovye-divany .bar-f, .bars-leg .bar-uglovye-divany i { background: var(--c-accent); }
+.bar-modulnye-divany .bar-f, .bars-leg .bar-modulnye-divany i { background: #4e5563; }
+.bar:hover .bar-f { filter: brightness(.85); }
+.bar-v { font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; } .bar-v i { font-style: normal; font-weight: 400; color: var(--c-ink-2); }
+.bars-leg { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--c-ink-2); margin: 10px 0 0; }
+.bars-leg i { display: inline-block; width: 14px; height: 14px; background: #8e9096; margin-right: 6px; vertical-align: -2px; }
+@media (max-width: 600px) { .bar { grid-template-columns: 1fr 56px; row-gap: 4px; } .bar-n { grid-column: 1 / -1; } }
+.pal { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.pal-i { display: grid; gap: 4px; background: #fff; padding: 14px; text-decoration: none !important; color: var(--c-ink) !important; border: 2px solid transparent; }
+.pal-i span { height: 54px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1); }
+.pal-i b { font-weight: 500; } .pal-i i { font-style: normal; font-size: 12px; color: var(--c-ink-2); }
+.pal-i.is-on { border-color: var(--c-accent); } .pal-i:hover { border-color: #bbb; }
+@media (max-width: 760px) { .pal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.mech3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mech, .duo figure { margin: 0; background: #fff; padding: 18px; display: grid; gap: 10px; align-content: start; }
+.mech figcaption, .duo figcaption { font-size: 14px; color: var(--c-ink-2); } .mech figcaption b, .duo figcaption b { display: block; color: var(--c-ink); font-size: 16px; font-weight: 500; }
+.mech svg, .duo svg, .mech1 svg { width: 100%; height: auto; color: var(--c-ink); }
+.mech1 { background: #fff; padding: 18px 24px; } .mech1-t { margin: 0 0 8px; }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.wide-map svg, svg.wide { width: 100%; height: auto; color: var(--c-ink); }
+.card .mech3, .card .duo { grid-template-columns: 1fr; }
+.card .ig-scheme { padding: 0; }
+@media (max-width: 760px) { .mech3, .duo { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .bar { grid-template-columns: 104px 1fr 48px; gap: 8px; row-gap: 0; } .bar-n { grid-column: auto; font-size: 13px; line-height: 1.2; } .bar-n i { display: block; font-size: 11px; } .bar-t { height: 14px; } .bar-v { font-size: 13px; } .bar-v i { display: none; } .bars { gap: 6px; } .ig-scheme { padding: 20px 16px; } }
