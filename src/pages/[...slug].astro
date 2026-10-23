@@ -8,7 +8,7 @@ import { renderMd } from '../lib/md.mjs';
 import { graph } from '../lib/schema.mjs';
 import { u } from '../lib/site.mjs';
 import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
-import { picture, productCard, showroomsHtml, cartPayload, esc } from '../lib/render.mjs';
+import { picture, productCard, showroomsHtml, cartPayload, esc, productsGrid, filtersHtml } from '../lib/render.mjs';
 import { cardifySections as cardify, cardify as cardifyOne } from '../lib/layout.mjs';
 
 export function getStaticPaths() {
@@ -56,13 +56,18 @@ const keySpecs = p ? [
   { ico: IC.time, label: 'Изготовление', value: p.in_stock ? `в наличии, ${settings.delivery.in_stock_days} дня` : `${settings.delivery.made_to_order_days} дней` },
   { ico: IC.shield, label: 'Гарантия', value: `${p.warranty_months} месяцев` },
 ] : [];
-const bodyHtml = !isProduct && !isCart ? cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
+// категория или подборка, созданная в админке без вставки :::products, всё равно показывает свои товары
+const ruleStr = d.listing?.rule && Object.keys(d.listing.rule).length ? Object.entries(d.listing.rule).map(([k, v]) => `${k}=${v}`).join(',') : '';
+const autoGrid = !isProduct && !isCart && ruleStr && !/:::products/.test(page.body || '') ? `<section class="sec">${filtersHtml()}${productsGrid(ruleStr)}</section>` : '';
+// подборка, в которую попало меньше 3 товаров, закрывается от индексации (правило статических фильтров)
+const thin = ['filter', 'collection'].includes(type) && ruleStr && select(ruleStr).length < 3;
+const bodyHtml = !isProduct && !isCart ? autoGrid + cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
 const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
 const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
 const ui = d.ui_texts || {};
 const fab = Object.values(MATERIAL);
 ---
-<Base data={d} schema={schema} ogImage={og} noindex={isCart} bodyClass={isProduct ? 'has-mbar' : ''}>
+<Base data={d} schema={schema} ogImage={og} noindex={isCart || thin} bodyClass={isProduct ? 'has-mbar' : ''}>
 {isProduct && p ? (
   <>
     <div class="wrap" style="padding-top:24px"><ol class="crumbs">{crumbs.map((c, i) => <li>{i < crumbs.length - 1 ? <a href={u(c.url)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</li>)}</ol></div>
@@ -92,7 +97,7 @@ const fab = Object.values(MATERIAL);
           {keySpecs.map((k) => <li><span class="kspec-ico" set:html={k.ico} /><span class="kspec-l">{k.label}</span><b>{k.value}</b></li>)}
         </ul>
         <div class="pdesc-intro" set:html={descIntro} />
-        {d.features?.length > 0 && <ul class="feat">{d.features.map((f, i) => <li><span class="feat-n">{String(i + 1).padStart(2, '0')}</span>{typeof f === 'string' ? <p>{f}</p> : <><b>{f.title}</b><p>{f.text}</p></>}</li>)}</ul>}
+        {d.features?.length > 0 && <ul class="feat">{d.features.map((f, i) => <li><span class="feat-n">{String(i + 1).padStart(2, '0')}</span>{typeof f === 'string' ? <p>{f}</p> : <>{f.title && <b>{f.title}</b>}{f.text && <p>{f.text}</p>}</>}</li>)}</ul>}
         {descCards && <div class="pdesc-cards" set:html={descCards} />}
       </section>
       <section class="sec"><h2>Характеристики</h2>

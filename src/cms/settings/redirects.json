@@ -1,0 +1,20 @@
+{
+  "redirects": [
+    {
+      "from": "/index.html",
+      "to": "/"
+    },
+    {
+      "from": "/straight.html",
+      "to": "/catalog/pryamye-divany/"
+    },
+    {
+      "from": "/angular.html",
+      "to": "/catalog/uglovye-divany/"
+    },
+    {
+      "from": "/modular.html",
+      "to": "/catalog/modulnye-divany/"
+    }
+  ]
+}

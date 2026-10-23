@@ -3,12 +3,16 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE, u, canonical } from '../lib/site.mjs';
+import { normUrl } from '../lib/cms.mjs';
 import { img } from '../lib/catalog.mjs';
 const { data = {}, schema, home = false, ogImage, bodyClass = '', noindex = false } = Astro.props;
-const title = data.title || 'SIMMETRIKA';
-const desc = data.description || '';
+// длинное тире в сниппете запрещено правилами текстов: если его вписали в админке, выводим короткое
+const title = (data.title || 'SIMMETRIKA').replace(/—/g, '–');
+const desc = (data.description || '').replace(/—/g, '–');
 const og = ogImage ? img(ogImage) : null;
-const robots = SITE.preview || noindex || /noindex/.test(data.robots || '') ? 'noindex, nofollow' : 'index, follow';
+const closed = noindex || data.noindex === true || /noindex/.test(data.robots || '');
+const robots = SITE.preview ? 'noindex, nofollow' : closed ? 'noindex, follow' : 'index, follow';
+const canon = /^(\/|https?:)/.test(data.canonical || '') ? (/^https?:/.test(data.canonical) ? data.canonical : canonical(normUrl(data.canonical))) : data.url && !String(data.url).includes('{') ? canonical(data.url) : '';
 ---
 <!doctype html>
 <html lang="ru">
@@ -18,7 +22,7 @@ const robots = SITE.preview || noindex || /noindex/.test(data.robots || '') ? 'n
   <title>{title}</title>
   <meta name="description" content={desc}>
   <meta name="robots" content={robots}>
-  {data.url && !String(data.url).includes('{') && <link rel="canonical" href={canonical(data.url)}>}
+  {canon && <link rel="canonical" href={canon}>}
   <meta property="og:type" content="website">
   <meta property="og:title" content={data.og_title || title}>
   <meta property="og:description" content={data.og_description || desc}>

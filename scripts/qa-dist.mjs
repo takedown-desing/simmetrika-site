@@ -6,6 +6,7 @@ const BASE = '/simmetrika-site';
 const files = [];
 const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f.endsWith('.html')) files.push(p); } };
 walk(DIST);
+
 const exists = (href) => {
   let p = href.split('#')[0].split('?')[0];
   if (!p.startsWith(BASE)) return true;
@@ -16,8 +17,16 @@ const exists = (href) => {
 const strip = (s) => s.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ');
 const dec = (s) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").trim();
 const rows = []; let crit = 0, warn = 0;
+let redirects = 0;
 for (const f of files) {
   const h = fs.readFileSync(f, 'utf8');
+  if (/^admin(\/|$)/.test(path.relative(DIST, f))) continue; // админка и SEO-отчёт
+  const refresh = h.slice(0, 800).match(/http-equiv="refresh" content="0; url=([^"]+)"/);
+  if (refresh) { // /go/ и переадресации со старых адресов: проверяем только, что цель существует
+    redirects++;
+    if (!exists(refresh[1].replace(/&amp;/g, '&'))) { crit++; rows.push(['/' + path.relative(DIST, f), 0, 0, `CRIT переадресация на несуществующую страницу ${refresh[1]}`]); }
+    continue;
+  }
   const url = '/' + path.relative(DIST, f).replace(/index\.html$/, '');
   const issues = [];
   const h1 = (h.match(/<h1[\s>]/g) || []).length;
@@ -57,6 +66,6 @@ for (const f of files) {
 }
 const md = [`# QA-отчёт сборки (${new Date().toISOString().slice(0, 16)})`, '', `Страниц: ${files.length}. CRITICAL: ${crit}. WARN: ${warn}.`, '', '| URL | title | desc | Проверка |', '|---|---:|---:|---|', ...rows.sort().map((r) => `| ${r[0]} | ${r[1]} | ${r[2]} | ${r[3]} |`)].join('\n');
 fs.writeFileSync('qa-report.md', md);
-console.log(`QA: страниц ${files.length}, CRITICAL ${crit}, WARN ${warn}`);
+console.log(`QA: страниц ${files.length - redirects}, переадресаций ${redirects}, CRITICAL ${crit}, WARN ${warn}`);
 rows.filter((r) => r[3] !== 'ok').slice(0, 30).forEach((r) => console.log(r[0], '→', r[3]));
 process.exit(crit ? 1 : 0);

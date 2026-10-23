@@ -1,6 +1,6 @@
 ---
 import { u } from '../lib/site.mjs';
-const { items = [] } = Astro.props;
+const items = (Astro.props.items || []).filter((r) => r?.url && r?.title);
 ---
 {items.length > 0 && <section class="rel" aria-labelledby="rel-t"><div class="wrap">
   <h2 class="sec-title" id="rel-t">Смотрите также</h2>

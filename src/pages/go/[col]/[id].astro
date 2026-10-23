@@ -1,0 +1,21 @@
+---
+// Кнопка «Открыть на сайте» в админке ведёт на /go/<коллекция>/<имя файла записи>/,
+// а эта страница переадресует на настоящий адрес (он собирается из категории и адреса записи).
+import { cms } from '../../../lib/cms.mjs';
+import { u } from '../../../lib/site.mjs';
+export function getStaticPaths() {
+  return cms().pages.filter((p) => p.data.url && p.col !== 'settings' && !String(p.data.url).includes('{'))
+    .map((p) => ({ params: { col: p.col, id: p.file }, props: { to: p.data.type === 'error' ? '/404.html' : p.data.url } }));
+}
+const href = u(Astro.props.to);
+---
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="refresh" content={`0; url=${href}`}>
+  <title>Переход на страницу</title>
+</head>
+<body><p>Переходим на страницу: <a href={href}>{href}</a>. Если открылась ошибка 404, запись ещё не опубликована: нажмите в админке «Опубликовать изменения» и подождите 2–3 минуты.</p></body>
+</html>

@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 const DIST = 'dist', BASE = '/simmetrika-site';
 const pages = [];
-const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f === 'index.html') pages.push(p); } };
+const isService = (root, p) => /^(admin|go)(\/|$)/.test(path.relative(root, p)) || /http-equiv="refresh"/.test(fs.readFileSync(p, 'utf8').slice(0, 800)); // админка, /go/ и переадресации
+const walk = (d) => { for (const f of fs.readdirSync(d)) { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (f === 'index.html' && !isService(DIST, p)) pages.push(p); } };
 walk(DIST);
 const urlOf = (f) => '/' + path.relative(DIST, f).replace(/index\.html$/, '');
 const norm = (h) => { let u = h.split('#')[0].split('?')[0]; if (!u.startsWith(BASE)) return null; u = u.slice(BASE.length) || '/'; return u.endsWith('/') ? u : u + '/'; };

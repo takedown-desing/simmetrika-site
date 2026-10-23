@@ -1,0 +1,16 @@
+{
+  "moscow_mkad_rub": 1500,
+  "outside_mkad_per_km_rub": 40,
+  "lift_floor_rub": "бесплатно при лифте, 300 ₽/этаж без лифта",
+  "assembly": "сборка угловых и модульных включена",
+  "pickup": "бесплатно из любого шоурума",
+  "in_stock_days": "1–3",
+  "made_to_order_days": "14–21",
+  "standard_days": 30,
+  "prepayment_custom_pct": 30,
+  "payment": [
+    "наличными или картой курьеру",
+    "безналичный расчёт по счёту"
+  ],
+  "region_limit_km": 60
+}

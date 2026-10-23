@@ -1,0 +1,129 @@
+{
+  "fabrics": [
+    {
+      "material": "velyur",
+      "name": "Велюр",
+      "collection": "Velutto",
+      "price_k": 1.05,
+      "colors": [
+        "seryy",
+        "bezhevyy",
+        "zelenyy",
+        "siniy",
+        "zheltyy",
+        "terrakot",
+        "bordovyy",
+        "rozovyy",
+        "korichnevyy"
+      ],
+      "props": "мягкий, антикоготь, легко чистится"
+    },
+    {
+      "material": "rogozhka",
+      "name": "Рогожка",
+      "collection": "Lino",
+      "price_k": 1,
+      "colors": [
+        "seryy",
+        "bezhevyy",
+        "belyy",
+        "korichnevyy",
+        "zelenyy",
+        "siniy"
+      ],
+      "props": "износостойкая, фактурная, подходит семьям с детьми"
+    },
+    {
+      "material": "zhakkard",
+      "name": "Жаккард",
+      "collection": "Arte",
+      "price_k": 1.1,
+      "colors": [
+        "bezhevyy",
+        "korichnevyy",
+        "seryy"
+      ],
+      "props": "плотный, с рисунком, устойчив к истиранию"
+    }
+  ],
+  "colors": [
+    {
+      "slug": "seryy",
+      "name": "серый",
+      "plural": "Серые",
+      "hex": "#8E9096"
+    },
+    {
+      "slug": "bezhevyy",
+      "name": "бежевый",
+      "plural": "Бежевые",
+      "hex": "#D8C7AE"
+    },
+    {
+      "slug": "zelenyy",
+      "name": "зелёный",
+      "plural": "Зелёные",
+      "hex": "#4E7A5A"
+    },
+    {
+      "slug": "siniy",
+      "name": "синий",
+      "plural": "Синие",
+      "hex": "#2F4A73"
+    },
+    {
+      "slug": "belyy",
+      "name": "белый",
+      "plural": "Белые",
+      "hex": "#F1EFEA"
+    },
+    {
+      "slug": "korichnevyy",
+      "name": "коричневый",
+      "plural": "Коричневые",
+      "hex": "#6E4E3A"
+    },
+    {
+      "slug": "zheltyy",
+      "name": "жёлтый",
+      "plural": "Жёлтые",
+      "hex": "#D9A33A"
+    },
+    {
+      "slug": "terrakot",
+      "name": "терракотовый",
+      "plural": "Терракотовые",
+      "hex": "#B65A3A"
+    },
+    {
+      "slug": "bordovyy",
+      "name": "бордовый",
+      "plural": "Бордовые",
+      "hex": "#7A1E2B"
+    },
+    {
+      "slug": "rozovyy",
+      "name": "розовый",
+      "plural": "Розовые",
+      "hex": "#D9A3A6"
+    }
+  ],
+  "mechanisms": [
+    {
+      "slug": "none",
+      "name": "без механизма"
+    },
+    {
+      "slug": "pantograf",
+      "name": "пантограф"
+    },
+    {
+      "slug": "venetsiya",
+      "name": "венеция"
+    },
+    {
+      "slug": "vykatnoy",
+      "name": "выкатной"
+    }
+  ]
+}

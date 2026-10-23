@@ -1,0 +1,71 @@
+{
+  "id": "404",
+  "url": "/404/",
+  "type": "error",
+  "http_status": 404,
+  "robots": "noindex",
+  "x_robots_tag": "noindex",
+  "title": "Страница не найдена | SIMMETRIKA",
+  "description": "Такой страницы нет. Перейдите в каталог диванов SIMMETRIKA или позвоните нам.",
+  "h1": "Страница не найдена",
+  "lede": "Адрес изменился, страница удалена или в ссылке опечатка.",
+  "eyebrow": "Ошибка 404",
+  "date_modified": "2026-10-13",
+  "form_hidden": {
+    "type": "callback",
+    "error": "404",
+    "source_url": "запрошенный адрес, экранированный, до 255 символов",
+    "goal": "lead_callback, source=404"
+  },
+  "ui_texts": {
+    "error_code": "Ошибка 404",
+    "link_home": "На главную",
+    "link_catalog": "Каталог диванов",
+    "tiles_title": "Посмотрите диваны в каталоге",
+    "tile_count": {
+      "one": "{N} модель",
+      "few": "{N} модели",
+      "many": "{N} моделей"
+    },
+    "phone_title": "Или позвоните, подберём по телефону",
+    "phone": "+7 929 677-78-75",
+    "phone_href": "tel:+79296777875",
+    "phone_hours": "Ежедневно 10:00–21:00",
+    "phone_button": "Позвонить",
+    "contacts_link": "Контакты и шоурумы",
+    "callback_title": "Перезвоните мне",
+    "callback_subtitle": "Оставьте имя и телефон, менеджер поможет найти нужную модель.",
+    "callback_button": "Перезвоните мне",
+    "callback_success": "Спасибо, заявка принята, перезвоним в течение 1 часа в рабочее время 10:00–21:00.",
+    "hits_title": "Популярные модели",
+    "hits_more": "Подробнее"
+  },
+  "images": [
+    {
+      "slot": "tile-pryamye-divany",
+      "alt": "Прямые диваны, фабрика SIMMETRIKA"
+    },
+    {
+      "slot": "tile-uglovye-divany",
+      "alt": "Угловые диваны, фабрика SIMMETRIKA"
+    },
+    {
+      "slot": "tile-modulnye-divany",
+      "alt": "Модульные диваны и системы, фабрика SIMMETRIKA"
+    },
+    {
+      "slot": "tile-divany-krovati",
+      "alt": "Диваны-кровати со спальным местом, фабрика SIMMETRIKA"
+    },
+    {
+      "slot": "tile-sale",
+      "alt": "Распродажа выставочных образцов, фабрика SIMMETRIKA"
+    }
+  ],
+  "assumptions": [
+    "Q-10",
+    "Q-14",
+    "Q-15"
+  ],
+  "body": "Возможно, адрес изменился после обновления сайта. Все модели на месте: вернитесь [на главную](/), откройте [каталог диванов](/catalog/) или позвоните, менеджер подскажет нужный диван.\n\n## Посмотрите диваны в каталоге\n\n:::tiles{items=\"/catalog/pryamye-divany/,/catalog/uglovye-divany/,/catalog/modulnye-divany/,/catalog/divany-krovati/,/sale/\"}\n:::\n\n## Или позвоните, подберём по телефону\n\nЗвоните на +7 929 677-78-75 ежедневно с 10:00 до 21:00. Адреса шоурумов на странице [контакты и шоурумы](/kontakty/).\n\n:::form{type=\"callback\" title=\"Перезвоните мне\"}\nОставьте имя и телефон, менеджер поможет найти нужную модель.\n:::\n\n## Популярные модели\n\n:::products{rule=\"hit=true\" limit=\"4\"}\n:::"
+}

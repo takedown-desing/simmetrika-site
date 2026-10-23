@@ -12,7 +12,9 @@ const phoneHref = (p) => 'tel:' + String(p).replace(/[^\d+]/g, '');
 export function picture(src, alt = '', { cls = '', eager = false, sizes = '(min-width: 1000px) 400px, 100vw' } = {}) {
   const i = img(src);
   if (!i) return `<span class="ph ${cls}" role="img" aria-label="${esc(alt)}"></span>`;
-  return `<img class="${cls}" src="${u(i.l)}" srcset="${u(i.s)} 600w, ${u(i.l)} 1200w" sizes="${sizes}" alt="${esc(alt)}" width="${i.w}" height="${i.h}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  const set = i.s !== i.l ? ` srcset="${u(i.s)} 600w, ${u(i.l)} 1200w" sizes="${sizes}"` : '';
+  const wh = i.w ? ` width="${i.w}" height="${i.h}"` : '';
+  return `<img class="${cls}" src="${/^https?:/.test(i.l) ? i.l : u(i.l)}"${set} alt="${esc(alt)}"${wh} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 }
 
 const ICON = {

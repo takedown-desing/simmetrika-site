@@ -1,7 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import * as yaml from 'js-yaml';
-const DIR = path.resolve('content');
+import { cms } from './cms.mjs';
 let cache = null;
 
 // ── типографика: неразрывные пробелы, чтобы не было висячих «%.», «₽», «в», «и» на отдельной строке ──
@@ -18,7 +15,7 @@ export function typo(s) {
   t = t.replace(/(\S) +([–—]) /g, `$1${NB}$2 `); // тире не переносится в начало строки
   return t;
 }
-const SKIP_KEYS = new Set(['url', 'href', 'src', 'page_id', 'type', 'slug', 'cover', 'canonical', 'robots', 'rule', 'action', 'primary_kw', 'secondary_kws', 'assumptions', 'date', 'date_end', 'date_modified', 'title', 'description', 'og_title', 'og_description', 'x_robots_tag', 'external_links', 'anchors', 'placeholders']);
+const SKIP_KEYS = new Set(['_entry', 'photos', 'image', 'images', 'listing', 'samples', 'in_stock', 'sleeping', 'url', 'href', 'src', 'page_id', 'type', 'slug', 'cover', 'canonical', 'robots', 'rule', 'action', 'primary_kw', 'secondary_kws', 'assumptions', 'date', 'date_end', 'date_modified', 'title', 'description', 'og_title', 'og_description', 'x_robots_tag', 'external_links', 'anchors', 'placeholders']);
 const deepTypo = (v, key) => {
   if (SKIP_KEYS.has(key)) return v;
   if (typeof v === 'string') return typo(v);
@@ -35,18 +32,8 @@ const typoMd = (md) => md.split('\n').map((line) => {
 
 export function loadPages() {
   if (cache) return cache;
-  const pages = [];
-  for (const f of fs.readdirSync(DIR).filter((x) => x.endsWith('.md')).sort()) {
-    const raw = fs.readFileSync(path.join(DIR, f), 'utf8');
-    for (const chunk of raw.split('<!-- page-break -->')) {
-      const m = chunk.match(/^\s*---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-      if (!m) continue;
-      const data = deepTypo(yaml.load(m[1]) || {});
-      pages.push({ file: f, data, body: typoMd((m[2] || '').trim()) });
-    }
-  }
-  cache = pages;
-  return pages;
+  cache = cms().pages.map((p) => ({ col: p.col, file: p.file, data: deepTypo(p.data), body: typoMd(p.body || '') }));
+  return cache;
 }
 export const byUrl = () => Object.fromEntries(loadPages().filter((p) => p.data.url && !String(p.data.url).includes('{')).map((p) => [p.data.url, p]));
 export const byId = () => Object.fromEntries(loadPages().map((p) => [p.data.page_id, p]));

@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sync": "node scripts/sync-content.mjs",
+    "cms:config": "node scripts/gen-cms-config.mjs",
+    "validate": "node scripts/gen-cms-config.mjs && node scripts/validate-cms.mjs",
     "images": "node scripts/build-images.mjs",
-    "dev": "astro dev",
+    "dev": "node scripts/gen-cms-config.mjs && astro dev",
+    "prebuild": "node scripts/gen-cms-config.mjs && node scripts/validate-cms.mjs --quiet",
     "build": "astro build",
+    "postbuild": "node scripts/save-cms-state.mjs && node scripts/validate-cms.mjs --quiet --report",
     "preview": "astro preview",
-    "check:content": "node scripts/check-content.mjs",
-    "qa": "node scripts/qa-dist.mjs"
+    "qa": "node scripts/qa-dist.mjs",
+    "test:admin": "node scripts/test-admin.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -25,5 +28,9 @@
     "sharp": "^0.35.5",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }

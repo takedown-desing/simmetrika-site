@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-const CAT = JSON.parse(fs.readFileSync(path.resolve('src/data/catalog.json'), 'utf8'));
+import { cms } from './cms.mjs';
+const CAT = cms().catalog;
 let IMG = {};
 try { IMG = JSON.parse(fs.readFileSync(path.resolve('src/data/images.json'), 'utf8')); } catch {}
 export const catalog = CAT;
@@ -8,17 +9,23 @@ export const products = CAT.products;
 export const showrooms = CAT.showrooms;
 export const settings = CAT.settings;
 export const fabrics = CAT.fabrics;
-export const COLOR_HEX = {
-  seryy: '#8E9096', bezhevyy: '#D8C7AE', zelenyy: '#4E7A5A', siniy: '#2F4A73', belyy: '#F1EFEA',
-  korichnevyy: '#6E4E3A', zheltyy: '#D9A33A', terrakot: '#B65A3A', bordovyy: '#7A1E2B', rozovyy: '#D9A3A6',
-};
+export const COLOR_HEX = CAT.color_hex;
 export const COLOR_NAME = CAT.colors; // slug -> «серый»
-export const COLOR_PLURAL = { seryy: 'Серые', bezhevyy: 'Бежевые', zelenyy: 'Зелёные', siniy: 'Синие', belyy: 'Белые', korichnevyy: 'Коричневые', zheltyy: 'Жёлтые', terrakot: 'Терракотовые', bordovyy: 'Бордовые', rozovyy: 'Розовые' };
+export const COLOR_PLURAL = CAT.color_plural;
 export const MATERIAL = Object.fromEntries(CAT.fabrics.map((f) => [f.material, f]));
 export const CATEGORY = Object.fromEntries(CAT.categories.map((c) => [c.slug, c]));
 export const MECH = CAT.mechanisms;
 export const SHOWROOM = Object.fromEntries(CAT.showrooms.map((s) => [s.slug, s]));
-export const img = (src) => (src && IMG[src]) || null;
+const IMG_BY_L = Object.fromEntries(Object.values(IMG).map((v) => [v.l, v]));
+// фото: готовые WebP фабрики (/img/p/<имя>-1200.webp + -600) или загруженные в админке файлы (/images/uploads/…)
+export const img = (src) => {
+  if (!src) return null;
+  if (IMG[src]) return IMG[src];
+  if (IMG_BY_L[src]) return IMG_BY_L[src];
+  if (/^\/img\/p\/.+-1200\.webp$/.test(src)) return { s: src.replace('-1200.webp', '-600.webp'), l: src, w: 1200, h: 900 };
+  if (/^(\/|https?:)/.test(src)) return { s: src, l: src, w: null, h: null };
+  return null;
+};
 export const rub = (n) => (n == null ? '' : Math.round(n).toLocaleString('ru-RU').replace(/[\u00a0\u202f ]/g, '\u00a0') + '\u00a0₽');
 export const variantPrice = (p, material = 'rogozhka') => (p.price_from ? Math.round((p.price_from * (MATERIAL[material]?.price_k || 1)) / 100) * 100 : null);
 export const priceText = (p, material = 'rogozhka', from = true) => (p.price_from ? `${from ? 'от ' : ''}${rub(variantPrice(p, material))}` : 'цена по запросу');
@@ -40,8 +47,9 @@ export function matchRule(p, rule) {
   const r = typeof rule === 'string' ? parseRule(rule) : rule || {};
   // кресла и пуфы показываем только в их разделе; общие подборки и «все диваны» только с диванами
   if (!r.category && p.category === 'kresla') return false;
-  for (const [k, v] of Object.entries(r)) {
+  for (const [k, v0] of Object.entries(r)) {
     if (k === 'all') continue;
+    const v = v0 === true ? 'true' : v0 === false ? 'false' : String(v0); // правило из админки приходит с true/false
     if (k === 'category' && p.category !== v) return false;
     if (k === 'mechanism' && p.mechanism !== v) return false;
     if (k === 'tag' && !(p.tags || []).includes(v)) return false;

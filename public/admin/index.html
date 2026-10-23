@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Админка · SIMMETRIKA</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="cms-config-url" href="./config.yml">
+  <style>
+    /* Sveltia запрещает выделение текста во всём интерфейсе; разрешаем копировать подписи, подсказки и тексты */
+    body, body *:not(button):not([role="button"]):not([role="tab"]):not([draggable="true"]) { -webkit-user-select: text !important; user-select: text !important; }
+    .seo-link { position: fixed; left: 12px; bottom: 12px; z-index: 2147483000; padding: 6px 12px; border-radius: 999px; background: #c8102e; color: #fff; font: 600 13px/1.2 -apple-system, Segoe UI, Arial, sans-serif; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  </style>
+  <script>
+    // обычное меню браузера по правому клику («Копировать», «Вставить», «Открыть ссылку») вместо меню Sveltia
+    window.addEventListener('contextmenu', function (e) { e.stopImmediatePropagation(); }, true);
+  </script>
+</head>
+<body>
+  <!-- Sveltia CMS: правки сохраняются коммитами в GitHub-репозиторий сайта, сайт пересобирается по кнопке «Опубликовать изменения» -->
+  <script src="https://unpkg.com/@sveltia/cms@0.250.2/dist/sveltia-cms.js"></script>
+  <a class="seo-link" href="./seo/" target="_blank" rel="noopener" title="Ошибки и SEO-замечания по всем страницам после последней публикации">SEO-проверка</a>
+</body>
+</html>
