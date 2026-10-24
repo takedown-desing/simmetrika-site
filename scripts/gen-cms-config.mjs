@@ -17,14 +17,18 @@ const showrooms = J('src/cms/settings/showrooms.json').showrooms || [];
 const categories = col('categories');
 const products = col('products');
 const opt = (value, label) => ({ value, label: label || value });
-const CAT_OPTS = categories.map((c) => opt(c.slug, c.name));
-const MAT_OPTS = (fab.fabrics || []).map((f) => opt(f.material, f.name));
-const COLOR_OPTS = (fab.colors || []).map((c) => opt(c.slug, c.name));
-const MECH_OPTS = (fab.mechanisms || []).map((m) => opt(m.slug, m.name));
-const SHOW_OPTS = showrooms.map((s) => opt(s.slug, s.name));
 const TAG_OPTS = [opt('dlya-gostinoy', 'Для гостиной'), opt('dizaynerskie', 'Дизайнерские'), opt('bolshie', 'Большие (ставится и автоматически от 250 см)')];
+// Связи (relation): значения берутся из данных прямо в админке, без пересборки сайта.
+// Новая категория, цвет, ткань, механизм или шоурум доступны для выбора сразу после сохранения.
+const relRaw = (name, label, collection, value_field, display_fields, x = {}) => ({ name, label, widget: 'relation', required: false, collection, value_field, display_fields, search_fields: display_fields, ...x });
+// категория хранится по имени файла записи: смена адреса категории не ломает её товары
+const REL_CAT = (x) => relRaw('category', 'Категория', 'categories', '{{slug}}', ['name'], { dropdown_threshold: 8, ...x });
+const REL_MAT = (name = 'material', label = 'Материал обивки', x) => relRaw(name, label, 'settings', 'fabrics.*.material', ['fabrics.*.name'], { file: 'fabrics', ...x });
+const REL_COLOR = (name = 'color', label = 'Цвет', x) => relRaw(name, label, 'settings', 'colors.*.slug', ['colors.*.name'], { file: 'fabrics', dropdown_threshold: 12, ...x });
+const REL_MECH = (x) => relRaw('mechanism', 'Механизм', 'settings', 'mechanisms.*.slug', ['mechanisms.*.name'], { file: 'fabrics', ...x });
+const REL_SHOW = (x) => relRaw('showroom', 'Шоурум', 'settings', 'showrooms.*.slug', ['showrooms.*.name'], { file: 'showrooms', ...x });
 // товар выбирается по имени файла записи: оно не меняется при смене адреса или категории
-const PRODUCT_OPTS = products.map((p) => opt(p.file, `${p.h1 || p.name}${p.hidden ? ' (скрыт)' : ''}`));
+const REL_PRODUCTS = (x) => relRaw('product_ids', 'Товары по теме', 'products', '{{slug}}', ['h1'], { multiple: true, search_fields: ['h1', 'name'], ...x });
 
 // ── конструкторы полей ──
 const str = (name, label, x = {}) => ({ name, label, widget: 'string', required: false, ...x });
@@ -73,7 +77,7 @@ const pageFields = [
 ];
 const internal = ['secondary_kws', 'assumptions', 'date_modified', 'breadcrumbs'].map(hid);
 const ruleFields = [
-  sel('category', 'Категория', CAT_OPTS), sel('mechanism', 'Механизм', MECH_OPTS), sel('material', 'Материал обивки', MAT_OPTS), sel('color', 'Цвет', COLOR_OPTS),
+  REL_CAT(), REL_MECH(), REL_MAT(), REL_COLOR(),
   sel('tag', 'Метка товара', TAG_OPTS), num('length_gte', 'Длина от, см'), bool('in_stock', 'Только в наличии'), bool('sample', 'Только выставочные образцы'),
   bool('has_sleeping_place', 'Только со спальным местом'), bool('has_storage', 'Только с ящиком для белья'), bool('hit', 'Только хиты'),
 ];
@@ -87,6 +91,8 @@ const config = {
   },
   site_url: SITE_URL, display_url: SITE_URL, logo: { src: SITE_URL + 'favicon.svg' },
   media_folder: 'public/images/uploads', public_folder: '/images/uploads',
+  // загруженные фото: имя латиницей (Тестовое Фото.jpg → testovoe-foto.webp), WebP до 1600 px прямо в браузере, до 20 МБ на файл
+  media_libraries: { default: { config: { slugify_filename: true, max_file_size: 20000000, transformations: { raster_image: { format: 'webp', quality: 82, width: 1600, height: 1600 } } } } },
   slug: { encoding: 'ascii', clean_accents: true, sanitize_replacement: '-' },
   collections: [
     {
@@ -97,24 +103,24 @@ const config = {
       fields: [
         str('name', 'Название модели', { required: true, hint: 'Эджио' }),
         str('slug', 'Адрес (латиницей)', { required: true, pattern: SLUG_P, hint: 'edzhio → /catalog/pryamye-divany/edzhio/. Смена адреса опубликованного товара создаёт переадресацию автоматически' }),
-        sel('category', 'Категория', CAT_OPTS, { required: true }),
+        REL_CAT({ required: true, hint: 'Новая категория появится в списке сразу после её сохранения' }),
         bool('hidden', 'Скрыть с сайта', false, { hint: 'Карточка пропадёт с сайта, старый адрес переадресуется в категорию' }),
         num('order', 'Порядок в каталоге', { hint: 'Меньше: выше' }),
         num('price_from', 'Цена «от», ₽ (рогожка)', { hint: 'Пусто: «цена по запросу»' }),
         bool('is_hit', 'Хит продаж (на главной)'),
         sel('tags', 'Метки для подборок', TAG_OPTS, { multiple: true }),
-        sel('mechanism', 'Механизм трансформации', MECH_OPTS, { default: 'none' }),
+        REL_MECH({ label: 'Механизм трансформации', default: 'none', required: true }),
         obj('sleeping', 'Спальное место, см', [num('w', 'Ширина'), num('l', 'Длина')], { hint: 'Пусто: без спального места' }),
         num('length_cm', 'Длина, см'), num('depth_cm', 'Глубина, см'), num('height_cm', 'Высота, см'), num('seat_height_cm', 'Высота посадки, см'),
         bool('has_storage', 'Есть ящик для белья'), bool('sides', 'Угловой: выбор стороны угла (левый/правый)'),
         str('lead_time_days', 'Срок изготовления, дней', { default: '14–21' }),
-        obj('in_stock', 'В наличии на складе', [sel('material', 'Материал', MAT_OPTS), sel('color', 'Цвет', COLOR_OPTS)], { hint: 'Пусто: «под заказ»' }),
+        obj('in_stock', 'В наличии на складе', [REL_MAT('material', 'Материал'), REL_COLOR()], { hint: 'Пусто: «под заказ»' }),
         num('warranty_months', 'Гарантия, месяцев', { default: 18 }),
         str('model_family', 'Семейство модели', { hint: 'Одинаковое у исполнений одной модели в разных категориях (edzhio): блок «Эта модель в других исполнениях»' }),
         plist('modules', 'Модули (для модульных)', str('m', 'Модуль')),
         plist('photos', 'Фото (первое будет главным)', img('p', 'Фото', { hint: 'JPG/WebP 1200–1600 px по длинной стороне' }), { collapsed: false }),
         str('alt_template', 'Шаблон alt для фото', { hint: 'Прямой диван Эджио, {материал} {цвет}: подставятся выбранные ткань и цвет' }),
-        list('samples', 'Выставочные образцы (распродажа)', [sel('showroom', 'Шоурум', SHOW_OPTS), sel('material', 'Материал', MAT_OPTS), sel('color', 'Цвет', COLOR_OPTS), num('discount_pct', 'Скидка, %'), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'Образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
+        list('samples', 'Выставочные образцы (распродажа)', [REL_SHOW(), REL_MAT('material', 'Материал'), REL_COLOR(), num('discount_pct', 'Скидка, %'), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'Образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
         txt('construction', 'Конструкция (каркас, наполнитель, опоры)'),
         ...seo,
         txt('lede', 'Подзаголовок карточки'),
@@ -129,7 +135,7 @@ const config = {
       identifier_field: 'name', slug: '{{fields.slug}}', summary: '{{name}} · /catalog/{{slug}}/', preview_path: go('categories'), sortable_fields: ['order', 'name'],
       description: 'Категория = страница /catalog/<адрес>/ со всеми товарами, у которых выбрана эта категория. Новая категория сразу появится в выборе категории у товаров (после публикации).',
       fields: [
-        str('name', 'Название', { required: true }), str('slug', 'Адрес (латиницей)', { required: true, pattern: SLUG_P, hint: 'pryamye-divany → /catalog/pryamye-divany/' }),
+        str('name', 'Название', { required: true }), str('slug', 'Адрес (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'pryamye-divany → /catalog/pryamye-divany/' }),
         num('order', 'Порядок'), bool('in_menu', 'Показывать в меню', true), bool('hidden', 'Скрыть с сайта'),
         ...seo, ...pageFields, hid('listing'), ...internal,
       ],
@@ -139,10 +145,10 @@ const config = {
       identifier_field: 'h1', slug: '{{fields.url}}', summary: '{{h1}} · {{url}}', preview_path: go('collections'), sortable_fields: ['url', 'h1'],
       description: 'SEO-подборки: диваны-кровати, механизмы, ткани, цвета, «для гостиной», «в наличии». Товары отбираются автоматически по правилу. Подборка, в которую попало меньше 3 товаров, закрывается от индексации.',
       fields: [
-        str('url', 'Адрес страницы', { required: true, pattern: URL_P, hint: '/catalog/divany-krovati/pantograf/: латиница, со слэшами' }),
-        sel('type', 'Тип', [opt('collection', 'Подборка'), opt('filter', 'Фильтр-посадочная')], { default: 'filter' }),
+        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: '/catalog/divany-krovati/pantograf/: латиница, со слэшами' }),
+        sel('type', 'Тип', [opt('collection', 'Подборка'), opt('filter', 'Фильтр-посадочная')], { default: 'filter', required: true }),
         bool('hidden', 'Скрыть с сайта'),
-        obj('listing', 'Какие товары показывать', [obj('rule', 'Правило отбора (все условия вместе)', ruleFields, { collapsed: false }), sel('sort_default', 'Сортировка', [opt('popularity', 'По популярности'), opt('price_asc', 'Дешевле'), opt('price_desc', 'Дороже'), opt('discount', 'По скидке')])], { collapsed: false }),
+        obj('listing', 'Какие товары показывать', [obj('rule', 'Правило отбора (все условия вместе)', ruleFields, { collapsed: false, required: true }), sel('sort_default', 'Сортировка', [opt('popularity', 'По популярности'), opt('price_asc', 'Дешевле'), opt('price_desc', 'Дороже'), opt('discount', 'По скидке')], { default: 'popularity' })], { collapsed: false, required: true }),
         ...seo, str('robots', 'Robots (служебное)', { hint: 'noindex,follow: закрыть; пусто: по правилу 3 товаров' }), str('index_when', 'Когда открыть индексацию (заметка)'),
         ...pageFields, ...internal,
       ],
@@ -152,9 +158,9 @@ const config = {
       identifier_field: 'h1', slug: '{{fields.id}}', summary: '{{h1}} · {{url}}', preview_path: go('pages'), sortable_fields: ['url', 'h1'],
       description: 'Главная, каталог, распродажа, «на заказ», доставка, о фабрике, контакты, новости (список), заявка, политика, 404 и любые новые страницы (гарантия, акции, статьи). Новая страница: заполните «Код страницы», адрес и H1.',
       fields: [
-        str('id', 'Код страницы (латиницей)', { required: true, pattern: SLUG_P, hint: 'garantiya: имя файла записи' }),
-        str('url', 'Адрес страницы', { required: true, pattern: URL_P, hint: '/garantiya/: латиница, со слэшами' }),
-        sel('type', 'Шаблон', [opt('service', 'Текстовая страница'), opt('landing', 'Посадочная с товарами'), opt('about', 'О компании'), opt('contact', 'Контакты'), opt('hub', 'Каталог (хаб)'), opt('home', 'Главная'), opt('news-list', 'Список новостей'), opt('legal', 'Документ (политика)'), opt('cart', 'Заявка (служебная)'), opt('error', 'Ошибка 404 (служебная)')], { default: 'service' }),
+        str('id', 'Код страницы (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'garantiya: имя файла записи' }),
+        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: '/garantiya/: латиница, со слэшами' }),
+        sel('type', 'Шаблон', [opt('service', 'Текстовая страница'), opt('landing', 'Посадочная с товарами'), opt('about', 'О компании'), opt('contact', 'Контакты'), opt('hub', 'Каталог (хаб)'), opt('home', 'Главная'), opt('news-list', 'Список новостей'), opt('legal', 'Документ (политика)'), opt('cart', 'Заявка (служебная)'), opt('error', 'Ошибка 404 (служебная)')], { default: 'service', required: true }),
         bool('hidden', 'Скрыть с сайта'),
         ...seo, str('robots', 'Robots (служебное)'),
         ...pageFields, hid('listing'),
@@ -167,13 +173,13 @@ const config = {
       identifier_field: 'h1', slug: '{{fields.slug}}', summary: '{{date}} · {{h1}}', preview_path: go('news'), sortable_fields: ['date', 'h1'],
       description: 'Новость или акция: /news/<адрес>/. Последние записи выводятся на главной и в разделе «Новости».',
       fields: [
-        str('slug', 'Адрес (латиницей)', { required: true, pattern: SLUG_P }),
-        sel('news_type', 'Тип', [opt('news', 'Новость'), opt('promo', 'Акция')], { default: 'news' }),
+        str('slug', 'Адрес (латиницей)', { required: true, unique: true, pattern: SLUG_P }),
+        sel('news_type', 'Тип', [opt('news', 'Новость'), opt('promo', 'Акция')], { default: 'news', required: true }),
         { name: 'date', label: 'Дата публикации', widget: 'datetime', format: 'YYYY-MM-DD', time_format: false, required: true },
         { name: 'date_end', label: 'Акция до (если есть)', widget: 'datetime', format: 'YYYY-MM-DD', time_format: false, required: false },
         bool('hidden', 'Скрыть с сайта'),
         img('cover', 'Обложка'), str('cover_alt', 'Описание обложки (alt)'), txt('announce', 'Анонс (до 200 знаков)'),
-        sel('product_ids', 'Товары по теме', PRODUCT_OPTS, { multiple: true }),
+        REL_PRODUCTS(),
         ...seo, ...pageFields, hid('url'), ...internal,
       ],
     },
@@ -193,17 +199,17 @@ const config = {
           list('showrooms', 'Шоурумы', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('address', 'Адрес', { required: true }), str('hours', 'Часы работы'), str('phone', 'Телефон'), bool('is_main', 'Главный шоурум'), bool('hidden', 'Скрыть'), { name: 'lat', label: 'Широта', widget: 'number', value_type: 'float', required: false }, { name: 'lon', label: 'Долгота', widget: 'number', value_type: 'float', required: false }], { label_singular: 'Шоурум', summary: '{{fields.name}}', collapsed: false }),
         ] },
         { name: 'fabrics', label: 'Ткани, цвета, механизмы', file: 'src/cms/settings/fabrics.json', format: 'json', fields: [
-          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, sel('colors', 'Доступные цвета', COLOR_OPTS, { multiple: true }), str('props', 'Свойства')], { label_singular: 'Материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
+          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, REL_COLOR('colors', 'Доступные цвета', { multiple: true }), str('props', 'Свойства')], { label_singular: 'Материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
           list('colors', 'Цвета', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('plural', 'Во множественном числе («Серые»)'), { name: 'hex', label: 'Цвет кружка', widget: 'color', required: false }], { label_singular: 'Цвет', summary: '{{fields.name}}' }),
           list('mechanisms', 'Механизмы', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true })], { label_singular: 'Механизм', summary: '{{fields.name}}' }),
         ] },
         { name: 'menu', label: 'Меню сайта', file: 'src/cms/settings/menu.json', format: 'json', fields: [
-          list('nav', 'Меню слева от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true }), bool('accent', 'Выделить красным')], { summary: '{{fields.title}}' }),
-          list('nav_right', 'Меню справа от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true })], { summary: '{{fields.title}}' }),
-          list('catalog_menu', 'Меню «Каталог товаров» (колонки)', [str('title', 'Заголовок колонки', { required: true }), list('items', 'Ссылки', [str('title', 'Текст', { required: true }), str('url', 'Адрес', { required: true })], { summary: '{{fields.title}}' })], { summary: '{{fields.title}}' }),
+          list('nav', 'Меню слева от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true }), bool('accent', 'Выделить красным')], { label_singular: 'пункт', summary: '{{fields.title}}' }),
+          list('nav_right', 'Меню справа от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true })], { label_singular: 'пункт', summary: '{{fields.title}}' }),
+          list('catalog_menu', 'Меню «Каталог товаров» (колонки)', [str('title', 'Заголовок колонки', { required: true }), list('items', 'Ссылки', [str('title', 'Текст', { required: true }), str('url', 'Адрес', { required: true })], { label_singular: 'ссылку', summary: '{{fields.title}}' })], { label_singular: 'колонку', summary: '{{fields.title}}' }),
         ] },
         { name: 'redirects', label: 'Переадресации', file: 'src/cms/settings/redirects.json', format: 'json', fields: [
-          list('redirects', 'Ручные переадресации', [str('from', 'Старый адрес', { hint: '/akcii/ или /straight.html' }), str('to', 'Куда вести', { hint: '/sale/' })], { summary: '{{fields.from}} → {{fields.to}}', hint: 'При смене адреса, скрытии или удалении записи переадресация ставится автоматически. Сюда: только особые случаи.' }),
+          list('redirects', 'Ручные переадресации', [str('from', 'Старый адрес', { hint: '/akcii/ или /straight.html' }), str('to', 'Куда вести', { hint: '/sale/' })], { label_singular: 'переадресацию', summary: '{{fields.from}} → {{fields.to}}', hint: 'При смене адреса, скрытии или удалении записи переадресация ставится автоматически. Сюда: только особые случаи.' }),
         ] },
       ],
     },
@@ -211,4 +217,4 @@ const config = {
 };
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, '# Сгенерировано scripts/gen-cms-config.mjs, не править вручную (JSON = валидный YAML)\n' + JSON.stringify(config, null, 2) + '\n');
-console.log('[gen-cms-config] коллекций:', config.collections.length, '| категорий:', CAT_OPTS.length, '| товаров:', PRODUCT_OPTS.length);
+console.log('[gen-cms-config] коллекций:', config.collections.length, '| категорий:', categories.length, '| товаров:', products.length);

@@ -3,12 +3,12 @@ import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import Faq from '../components/Faq.astro';
 import Related from '../components/Related.astro';
-import { loadPages } from '../lib/content.mjs';
+import { loadPages, byUrl, titleOf } from '../lib/content.mjs';
 import { renderMd } from '../lib/md.mjs';
 import { graph } from '../lib/schema.mjs';
 import { u } from '../lib/site.mjs';
 import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
-import { picture, productCard, showroomsHtml, cartPayload, esc, productsGrid, filtersHtml } from '../lib/render.mjs';
+import { picture, productCard, showroomsHtml, cartPayload, esc, productsGrid, filtersHtml, chips } from '../lib/render.mjs';
 import { cardifySections as cardify, cardify as cardifyOne } from '../lib/layout.mjs';
 
 export function getStaticPaths() {
@@ -25,7 +25,14 @@ const isCart = type === 'cart';
 const p = isProduct ? products.find((x) => x.url === d.url) : null;
 const crumbs = p
   ? [{ name: 'Главная', url: '/' }, { name: 'Каталог', url: '/catalog/' }, { name: CATEGORY[p.category].name, url: CATEGORY[p.category].url }, { name: d.h1, url: d.url }]
-  : d.breadcrumbs || [{ name: 'Главная', url: '/' }, { name: d.h1, url: d.url }];
+  : d.breadcrumbs || autoCrumbs();
+// крошки для страниц из админки: Главная › каждый существующий родительский раздел по адресу › страница
+function autoCrumbs() {
+  const out = [{ name: 'Главная', url: '/' }];
+  const parts = String(d.url || '').split('/').filter(Boolean);
+  for (let i = 1; i < parts.length; i++) { const pre = '/' + parts.slice(0, i).join('/') + '/'; if (byUrl()[pre]) out.push({ name: titleOf(pre), url: pre }); }
+  return [...out, { name: d.h1, url: d.url }];
+}
 
 // товар
 let descIntro = '', descCards = '', similar = [], family = [];
@@ -61,7 +68,10 @@ const ruleStr = d.listing?.rule && Object.keys(d.listing.rule).length ? Object.e
 const autoGrid = !isProduct && !isCart && ruleStr && !/:::products/.test(page.body || '') ? `<section class="sec">${filtersHtml()}${productsGrid(ruleStr)}</section>` : '';
 // подборка, в которую попало меньше 3 товаров, закрывается от индексации (правило статических фильтров)
 const thin = ['filter', 'collection'].includes(type) && ruleStr && select(ruleStr).length < 3;
-const bodyHtml = !isProduct && !isCart ? autoGrid + cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
+// подборки, вложенные в раздел по адресу (/catalog/x/ → /catalog/x/y/), на которые текст раздела ещё не ссылается: чипы сверху, чтобы новая подборка из админки не осталась без ссылок
+const kids = ['category', 'filter', 'collection'].includes(type) && d.url ? Object.keys(byUrl()).filter((k) => k !== d.url && k.startsWith(d.url) && k.slice(d.url.length).split('/').filter(Boolean).length === 1 && ['filter', 'collection'].includes(byUrl()[k].data.type) && !(page.body || '').includes(k)) : [];
+const kidsHtml = kids.length ? chips(kids) : '';
+const bodyHtml = !isProduct && !isCart ? kidsHtml + autoGrid + cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
 const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
 const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
 const ui = d.ui_texts || {};

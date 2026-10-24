@@ -21,7 +21,24 @@ const cfg = JSON.parse(fs.readFileSync(CONFIG, 'utf8').replace(/^#.*\n/, ''));
 const entries = []; // { col, file, rel, data }
 const read = (rel) => { try { return JSON.parse(fs.readFileSync(rel, 'utf8')); } catch (e) { E(rel, `файл не читается как JSON: ${e.message.split('\n')[0]}`); return null; } };
 const empty = (v) => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length);
+// целиком пустой пункт списка (Sveltia оставляет "" после удаления файла из медиатеки): на сайте отбрасывается, не ошибка
+const blank = (v) => empty(v) || (typeof v === 'string' && !v.trim()) || (v && typeof v === 'object' && !Array.isArray(v) && Object.values(v).every(blank)) || (Array.isArray(v) && v.every(blank));
 const optVals = (f) => (f.options || []).map((o) => (typeof o === 'object' ? o.value : o));
+// допустимые значения связи (relation): из файлов коллекции или настроек, как их видит админка
+const relCache = {};
+function relValues(f) {
+  const key = `${f.collection}|${f.file || ''}|${f.value_field}`;
+  if (relCache[key]) return relCache[key];
+  const c = cfg.collections.find((x) => x.name === f.collection);
+  const pick = (obj, pathStr) => pathStr.split('.').reduce((acc, part) => acc.flatMap((v) => (part === '*' ? (Array.isArray(v) ? v : []) : v?.[part] !== undefined ? [v[part]] : [])), [obj]);
+  let vals = [];
+  if (f.file) { const fd = c?.files?.find((x) => x.name === f.file); try { vals = pick(JSON.parse(fs.readFileSync(fd.file, 'utf8')), f.value_field); } catch {} }
+  else if (c?.folder && fs.existsSync(c.folder)) for (const file of fs.readdirSync(c.folder).filter((x) => x.endsWith('.json'))) {
+    if (f.value_field === '{{slug}}') { vals.push(file.slice(0, -5)); continue; }
+    try { vals.push(...pick(JSON.parse(fs.readFileSync(`${c.folder}/${file}`, 'utf8')), f.value_field)); } catch {}
+  }
+  return (relCache[key] = vals.filter((v) => v !== '' && v != null).map(String));
+}
 function checkFields(fields, data, where) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) { E(where, 'ожидался объект'); return; }
   const known = new Set(fields.map((f) => f.name));
@@ -48,10 +65,16 @@ function checkValue(f, v, where) {
       if (!f.multiple && Array.isArray(v)) E(where, 'ожидалось одно значение');
       break;
     }
+    case 'relation': {
+      const vals = relValues(f);
+      for (const x of f.multiple ? [].concat(v) : [v]) if (!blank(x) && !vals.includes(String(x))) E(where, `значение «${x}» не найдено среди записей «${cfg.collections.find((c) => c.name === f.collection)?.label || f.collection}» (запись удалена?): выберите другое. Есть: ${vals.slice(0, 8).join(', ')}${vals.length > 8 ? '…' : ''}`);
+      if (!f.multiple && Array.isArray(v)) E(where, 'ожидалось одно значение');
+      break;
+    }
     case 'object': checkFields(f.fields, v, where); break;
     case 'list':
       if (!Array.isArray(v)) { E(where, 'ожидался список'); break; }
-      v.forEach((item, i) => (f.field ? checkValue({ ...f.field, required: true }, item, `${where} #${i + 1}`) : checkFields(f.fields, item, `${where} #${i + 1}`)));
+      v.forEach((item, i) => { if (blank(item)) return; f.field ? checkValue({ ...f.field, required: true }, item, `${where} #${i + 1}`) : checkFields(f.fields, item, `${where} #${i + 1}`); });
       break;
   }
 }
@@ -95,8 +118,9 @@ for (const e of entries) {
   if (e.col === 'pages' && d.id && !SLUG.test(d.id)) E(where(e), `код страницы «${d.id}»: только латиница, цифры, дефис`);
   if (e.col === 'pages' && d.id && d.id !== e.file) W(where(e), `код страницы «${d.id}» не совпадает с именем файла «${e.file}» (так бывает после переименования, на сайт не влияет)`);
   if (e.col === 'products' && d.category && d.slug && e.file !== `${d.category}--${d.slug}`) W(where(e), `имя файла «${e.file}» не совпадает с категорией и адресом (так бывает после смены категории или адреса: переадресация со старого адреса создаётся автоматически)`);
+  if (e.col === 'products' && d.category && !d.hidden && entries.find((x) => x.col === 'categories' && (x.file === d.category || x.data.slug === d.category))?.data.hidden) W(where(e), `категория «${d.category}» скрыта: товар не показывается на сайте`);
   if (['pages', 'collections', 'news'].includes(e.col) && empty(d.h1) && !['ui'].includes(d.type)) E(where(e), 'не заполнен H1');
-  for (const [i, q] of (d.faq || []).entries()) if (empty(q?.q) || empty(q?.a)) E(where(e), `FAQ #${i + 1}: пустой вопрос или ответ`);
+  for (const [i, q] of (d.faq || []).entries()) if (!blank(q) && (blank(q?.q) || blank(q?.a))) E(where(e), `FAQ #${i + 1}: пустой вопрос или ответ`);
 }
 
 // дубли адресов

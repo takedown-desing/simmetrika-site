@@ -38,9 +38,13 @@ export function cms() {
   const categoriesRaw = readCol('categories').filter((c) => !c.hidden).sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
   const categories = categoriesRaw.map((c) => { const slug = slugOf(c, c.name); return { slug, name: c.name, h1: c.h1 || c.name, url: `/catalog/${slug}/`, in_menu: c.in_menu !== false, _entry: c }; });
   const catBySlug = Object.fromEntries(categories.map((c) => [c.slug, c]));
+  // товары и правила подборок ссылаются на категорию по имени файла записи (оно не меняется при смене адреса категории);
+  // старые данные со slug тоже понимаем
+  const catByFile = Object.fromEntries(categories.map((c) => [c._entry.file, c]));
+  const catOf = (v) => catByFile[v]?.slug || (catBySlug[v] ? v : v);
   const TYPE = { 'pryamye-divany': 'Прямой', 'uglovye-divany': 'Угловой', 'modulnye-divany': 'Модульный', kresla: 'Кресло' };
   const MECH = Object.fromEntries((fab.mechanisms || []).map((m) => [m.slug, m.name]));
-  const productsRaw = readCol('products').filter((p) => !p.hidden && catBySlug[p.category]).sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
+  const productsRaw = readCol('products').map((p) => ({ ...p, category: catOf(p.category) })).filter((p) => !p.hidden && catBySlug[p.category]).sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
   const products = productsRaw.map((p) => {
     const slug = slugOf(p, p.name);
     const mechanism = p.mechanism || 'none';
@@ -84,7 +88,7 @@ export function cms() {
   }
   for (const e of readCol('collections').filter((x) => !x.hidden)) {
     const url = normUrl(e.url || `/catalog/${translit(e.h1 || e.file)}/`);
-    page('collections', e.file, { ...e, page_id: `filter:${e.file}`, type: e.type || 'filter', url, listing: { ...(e.listing || {}), rule: cleanRule(e.listing?.rule) } }, e.body);
+    page('collections', e.file, { ...e, page_id: `filter:${e.file}`, type: e.type || 'filter', url, listing: { ...(e.listing || {}), rule: (({ category, ...r }) => cleanRule({ ...r, category: category ? catOf(category) : category }))(e.listing?.rule || {}) } }, e.body);
   }
   for (const e of readCol('news').filter((x) => !x.hidden)) {
     const slug = slugOf(e, e.h1);

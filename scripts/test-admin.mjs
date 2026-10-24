@@ -40,7 +40,7 @@ const hasLink = (h, url) => h.includes(`href="${BASE}${url}"`);
 const cfgOf = () => JSON.parse(fs.readFileSync(P('public/admin/config.yml'), 'utf8').replace(/^#.*\n/, ''));
 const blankOf = (fields) => Object.fromEntries(fields.filter((f) => f.widget !== 'hidden').map((f) => [f.name,
   f.widget === 'object' ? blankOf(f.fields) : f.widget === 'list' ? [] : f.widget === 'number' ? null : f.widget === 'boolean' ? (f.default ?? false)
-    : f.widget === 'select' ? (f.multiple ? [] : (f.default ?? '')) : '']));
+    : ['select', 'relation'].includes(f.widget) ? (f.multiple ? [] : (f.default ?? '')) : '']));
 const blank = (col) => blankOf(cfgOf().collections.find((c) => c.name === col).fields);
 
 try {
@@ -120,7 +120,8 @@ try {
   ok(!!h && h1Of(h) === 'Софа Тест', 'новый товар в новой категории: карточка создана');
   ok(h.includes('цена по запросу'), 'новый товар без цены: «цена по запросу»');
   ok(/"Product"/.test(h), 'новый товар: микроразметка Product');
-  ok(fs.readFileSync(P('public/admin/config.yml'), 'utf8').includes('"value": "sofy"'), 'новая категория появилась в выборе категории у товаров');
+  const catField = cfgOf().collections.find((c) => c.name === 'products').fields.find((f) => f.name === 'category');
+  ok(catField.widget === 'relation' && catField.collection === 'categories', 'категория товара: связь с коллекцией категорий (новая категория доступна сразу, без пересборки)');
   ok(hasLink(page('/catalog/'), '/catalog/sofy/') || hasLink(page('/'), '/catalog/sofy/'), 'новая категория в меню «Каталог товаров»');
 
   h = page('/news/test-novost/');
@@ -164,6 +165,12 @@ try {
   ok(refreshTo(page('/catalog/uglovye-divany/milano-plus/')) === `${BASE}/catalog/uglovye-divany/milano-3/`, 'промежуточный адрес тоже ведёт на последний');
   h = page('/catalog/pryamye-divany/teo/');
   ok(!!h && !refreshTo(h) && h1Of(h).length > 0, 'товар вернули на сайт: снова живая страница, без переадресации');
+  // смена адреса категории с товарами: товары переезжают вместе с ней, со старых адресов переадресации
+  edit('categories/sofy.json', (d) => { d.slug = 'divany-sofy'; });
+  r = build();
+  ok(r.code === 0, 'смена адреса категории с товарами: сборка проходит (товары ссылаются на категорию по имени файла)');
+  ok(h1Of(page('/catalog/divany-sofy/sofa-test/')) === 'Софа Тест', 'товар переехал на адрес новой категории');
+  ok(refreshTo(page('/catalog/sofy/')) === `${BASE}/catalog/divany-sofy/` && refreshTo(page('/catalog/sofy/sofa-test/')) === `${BASE}/catalog/divany-sofy/sofa-test/`, 'со старых адресов категории и товара переадресации на новые');
   r = run('node', ['scripts/qa-dist.mjs']);
   ok(r.code === 0, `QA: ${(r.out.match(/QA:[^\n]*/) || [''])[0]}`);
   r = run('node', ['scripts/links-audit.mjs']);
@@ -185,7 +192,7 @@ try {
   const smFile = fs.readdirSync(P('dist')).find((f) => /^sitemap-0\.xml$/.test(f));
   const sm = smFile ? fs.readFileSync(P('dist', smFile), 'utf8') : '';
   ok(!!sm, 'sitemap собран');
-  ok(sm.includes('/catalog/sofy/sofa-test/') && sm.includes('/catalog/sofy/'), 'sitemap: новые товар и категория есть');
+  ok(sm.includes('/catalog/divany-sofy/sofa-test/') && sm.includes('/catalog/divany-sofy/') && !sm.includes('/catalog/sofy/'), 'sitemap: новые товар и категория по новому адресу, старого адреса нет');
   ok(!sm.includes('/garantiya/') && !sm.includes('/news/test-novost/'), 'sitemap: страницы с noindex и чужим canonical исключены');
   ok(!sm.includes('/admin/') && !sm.includes('/go/') && !sm.includes('/zayavka/'), 'sitemap: админка, /go/ и заявка исключены');
   ok(thin ? !sm.includes('/ot-330-sm/') : true, 'sitemap: подборка меньше 3 товаров исключена');
@@ -198,6 +205,7 @@ try {
     const file = P('src/cms', rel);
     const had = fs.existsSync(file); const before = had ? fs.readFileSync(file, 'utf8') : null;
     if (mutate === 'broken') fs.writeFileSync(file, before.slice(0, Math.floor(before.length / 2)));
+    else if (mutate === 'delete') fs.rmSync(file);
     else if (typeof mutate === 'function') { const d = had ? JSON.parse(before) : {}; mutate(d); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(d, null, 2)); }
     const res = validate();
     ok(res.code === 1 && res.out.includes(expect), `${name} → «${expect}»${res.code === 1 ? '' : ' (проверка НЕ остановила)'}`);
@@ -210,8 +218,8 @@ try {
   neg('адрес товара с пробелом', 'products/sofy--sofa-test.json', (d) => { d.slug = 'Sofa Test'; }, 'строчная латиница');
   neg('нет H1 у страницы', 'pages/garantiya.json', (d) => { d.h1 = ''; }, 'не заполнен H1');
   neg('нет обязательного поля', 'products/sofy--sofa-test.json', (d) => { d.name = ''; }, 'обязательное поле не заполнено');
-  neg('категория не из списка', 'products/sofy--sofa-test.json', (d) => { d.category = 'nesushchestvuet'; }, 'не из списка');
-  neg('цвет не из списка в правиле', 'collections/catalog-pryamye-divany-v-nalichii.json', (d) => { d.listing.rule.color = 'fioletovyy'; }, 'не из списка');
+  neg('категория не из списка', 'products/sofy--sofa-test.json', (d) => { d.category = 'nesushchestvuet'; }, 'не найдено');
+  neg('цвет не из списка в правиле', 'collections/catalog-pryamye-divany-v-nalichii.json', (d) => { d.listing.rule.color = 'fioletovyy'; }, 'не найдено');
   neg('текст вместо числа', 'products/sofy--sofa-test.json', (d) => { d.price_from = 'дорого'; }, 'ожидалось число');
   neg('неизвестная вставка', 'pages/garantiya.json', (d) => { d.body += '\n:::productz{rule="all"}\n:::\n'; }, 'неизвестная вставка');
   neg('незакрытая вставка', 'pages/garantiya.json', (d) => { d.body += '\n:::note\nзаметка без закрытия\n'; }, 'не хватает строки «:::»');
@@ -221,6 +229,14 @@ try {
   neg('битая ссылка в плитках', 'pages/garantiya.json', (d) => { d.body += '\n:::tiles{items="/catalog/,/net-razdela/"}\n:::\n'; }, 'страницы /net-razdela/ нет');
   neg('битая ссылка в меню', 'settings/menu.json', (d) => d.nav.push({ title: 'Нет', url: '/nope/' }), 'страницы /nope/ нет');
   neg('нет файла фото', 'products/sofy--sofa-test.json', (d) => { d.photos = ['/images/uploads/net-takogo.jpg']; }, 'нет файла картинки');
+  // пустые пункты списков (Sveltia оставляет "" после удаления файла из медиатеки) не должны останавливать публикацию
+  edit('products/sofy--sofa-test.json', (d) => { d.photos = ['', '']; d.faq = [{ q: '', a: '' }]; });
+  r = validate();
+  ok(r.code === 0, 'пустые пункты в фото и FAQ не считаются ошибкой (на сайте отбрасываются)');
+  edit('products/sofy--sofa-test.json', (d) => { d.photos = []; d.faq = []; });
+  neg('несуществующий цвет в наличии', 'products/sofy--sofa-test.json', (d) => { d.in_stock = { material: 'velyur', color: 'fioletovyy' }; }, 'не найдено');
+  neg('товар в новости удалён', 'news/test-novost.json', (d) => { d.product_ids = ['net-takogo--tovara']; }, 'не найдено');
+  neg('удалили категорию, а товары в ней остались', 'categories/sofy.json', 'delete', 'запись удалена');
   neg('пустой ответ FAQ', 'pages/garantiya.json', (d) => { d.faq = [{ q: 'Вопрос?', a: '' }]; }, 'обязательное поле не заполнено');
   neg('поле, которого нет в админке', 'products/sofy--sofa-test.json', (d) => { d.foo = 1; }, 'не описано в админке');
   neg('переадресация в никуда', 'settings/redirects.json', (d) => d.redirects.push({ from: '/old/', to: '/net-celi/' }), 'не существует');
