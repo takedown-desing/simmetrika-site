@@ -87,7 +87,12 @@ try {
   save('collections/catalog-pryamye-divany-v-nalichii.json', { ...blank('collections'), url: '/catalog/pryamye-divany/v-nalichii/', type: 'filter', h1: 'Прямые диваны в наличии', title: 'Прямые диваны в наличии в Москве | SIMMETRIKA', description: 'Прямые диваны в наличии на складе фабрики SIMMETRIKA: доставка по Москве за 1–3 дня, самовывоз из шоурума, цены от производителя.', listing: colRule({ category: 'pryamye-divany', in_stock: true }) });
   save('collections/catalog-uglovye-divany-ot-330.json', { ...blank('collections'), url: '/catalog/uglovye-divany/ot-330-sm/', type: 'filter', h1: 'Угловые диваны от 330 см', title: 'Большие угловые диваны от 330 см | SIMMETRIKA', description: 'Угловые диваны длиной от 330 см от фабрики SIMMETRIKA: для просторной гостиной, ткани на выбор, изготовление 14–21 день.', listing: colRule({ category: 'uglovye-divany', length_gte: 330 }) });
   edit('settings/menu.json', (d) => d.nav.push({ title: 'Гарантия', url: '/garantiya/', accent: false }));
-  edit('settings/menu.json', (d) => d.catalog_menu[0].items.push({ title: 'Софы', url: '/catalog/sofy/' }));
+  // страница, на которую не ссылается ничто (ни текст, ни меню, ни чип раздела)
+  save('pages/sirota.json', { ...blank('pages'), id: 'sirota', url: '/sirota/', type: 'service', h1: 'Страница-сирота', title: 'Страница-сирота для проверки | SIMMETRIKA', body: 'Текст.' });
+  // новый цвет без своей страницы и без «Цвета кружка»
+  edit('settings/fabrics.json', (d) => d.colors.push({ slug: 'grafit', name: 'Графит', plural: 'Графитовые', hex: '' }));
+  // подборка без title: в <title> подставится «H1 | SIMMETRIKA»; ссылку на неё даёт чип раздела, а не текст
+  save('collections/catalog-pryamye-divany-rogozhka.json', { ...blank('collections'), url: '/catalog/pryamye-divany/rogozhka/', type: 'filter', h1: 'Прямые диваны в рогожке', listing: colRule({ category: 'pryamye-divany', material: 'rogozhka' }) });
   edit('settings/company.json', (d) => { d.phone_main = '+7 (999) 111-22-33'; });
   // смена адреса, скрытие, удаление
   edit('products/uglovye-divany--milano.json', (d) => { d.slug = 'milano-plus'; });
@@ -122,11 +127,19 @@ try {
   ok(/"Product"/.test(h), 'новый товар: микроразметка Product');
   const catField = cfgOf().collections.find((c) => c.name === 'products').fields.find((f) => f.name === 'category');
   ok(catField.widget === 'relation' && catField.collection === 'categories', 'категория товара: связь с коллекцией категорий (новая категория доступна сразу, без пересборки)');
-  ok(hasLink(page('/catalog/'), '/catalog/sofy/') || hasLink(page('/'), '/catalog/sofy/'), 'новая категория в меню «Каталог товаров»');
+  const cmenu = (h) => (h || '').slice((h || '').indexOf('id="cmenu"'));
+  ok(hasLink(cmenu(page('/')), '/catalog/sofy/'), 'новая категория сама попала в меню «Каталог товаров» (в «Меню сайта» её не добавляли)');
+  h = page('/catalog/cvet/seryy/');
+  ok(h.includes('Графит') && !h.includes('/catalog/cvet/grafit/'), 'новый цвет без своей подборки: в палитре без битой ссылки');
+  h = page('/catalog/pryamye-divany/rogozhka/');
+  ok(titleOf(h).replace(/\u00a0/g, ' ') === 'Прямые диваны в рогожке | SIMMETRIKA', 'подборка без title: в <title> «H1 | SIMMETRIKA»');
+  ok(hasLink(page('/catalog/pryamye-divany/'), '/catalog/pryamye-divany/rogozhka/'), 'раздел сам показывает чип на новую вложенную подборку');
 
   h = page('/news/test-novost/');
   ok(!!h && h1Of(h) === 'Тестовая новость фабрики', 'новость /news/test-novost/ создана');
   ok(hasLink(page('/news/'), '/news/test-novost/'), 'новость в списке /news/');
+  const newsCards = [...(h.split('Товары по теме')[1] || '').matchAll(/<a class="pc-photo" href="([^"]+)"/g)].map((m) => m[1]);
+  ok(newsCards.includes(`${BASE}/catalog/pryamye-divany/edzhio/`) && newsCards.includes(`${BASE}/catalog/uglovye-divany/milano-plus/`), 'новость: блок «Товары по теме» с карточками, ссылка на товар после смены адреса новая');
 
   const prods = fs.readdirSync(P('src/cms/products')).map((f) => J('products/' + f)).filter((p) => !p.hidden);
   const stockN = prods.filter((p) => p.category === 'pryamye-divany' && p.in_stock?.material && p.in_stock?.color).length;
@@ -137,8 +150,9 @@ try {
   ok(new Set(cardLinks(page('/catalog/uglovye-divany/ot-330-sm/'))).size === longN, `подборка «длина от 330»: ${longN} карточек`);
   ok(fs.readFileSync(P('dist/admin/seo/index.html'), 'utf8').includes('/garantiya/'), 'SEO-отчёт видит новую страницу');
   const rep = JSON.parse(fs.readFileSync(P('dist/admin/seo/report.json'), 'utf8'));
-  ok(rep.pages.find((x) => x.url === '/catalog/uglovye-divany/ot-330-sm/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: новая подборка без входящих ссылок помечена');
+  ok(rep.pages.find((x) => x.url === '/sirota/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: страница без входящих ссылок помечена');
   ok(!rep.pages.find((x) => x.url === '/garantiya/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: страница со ссылкой из меню не считается сиротой');
+  ok(!rep.pages.find((x) => x.url === '/catalog/pryamye-divany/rogozhka/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: подборка с чипом в разделе не считается сиротой');
   ok(page('/').includes('111-22-33'), 'настройки: новый телефон в шапке');
 
   // смена адреса / скрытие / удаление
@@ -171,6 +185,7 @@ try {
   ok(r.code === 0, 'смена адреса категории с товарами: сборка проходит (товары ссылаются на категорию по имени файла)');
   ok(h1Of(page('/catalog/divany-sofy/sofa-test/')) === 'Софа Тест', 'товар переехал на адрес новой категории');
   ok(refreshTo(page('/catalog/sofy/')) === `${BASE}/catalog/divany-sofy/` && refreshTo(page('/catalog/sofy/sofa-test/')) === `${BASE}/catalog/divany-sofy/sofa-test/`, 'со старых адресов категории и товара переадресации на новые');
+  ok(hasLink(cmenu(page('/')), '/catalog/divany-sofy/') && !hasLink(cmenu(page('/')), '/catalog/sofy/'), 'меню «Каталог товаров»: категория по новому адресу');
   r = run('node', ['scripts/qa-dist.mjs']);
   ok(r.code === 0, `QA: ${(r.out.match(/QA:[^\n]*/) || [''])[0]}`);
   r = run('node', ['scripts/links-audit.mjs']);
@@ -228,6 +243,10 @@ try {
   neg('битая ссылка в тексте', 'pages/garantiya.json', (d) => { d.body += '\nСм. [страницу](/net-takoy-stranicy/).\n'; }, 'несуществующую страницу');
   neg('битая ссылка в плитках', 'pages/garantiya.json', (d) => { d.body += '\n:::tiles{items="/catalog/,/net-razdela/"}\n:::\n'; }, 'страницы /net-razdela/ нет');
   neg('битая ссылка в меню', 'settings/menu.json', (d) => d.nav.push({ title: 'Нет', url: '/nope/' }), 'страницы /nope/ нет');
+  neg('два цвета с одним кодом', 'settings/fabrics.json', (d) => d.colors.push({ ...d.colors[0], name: 'Дубль' }), 'уже есть у другой записи');
+  neg('код цвета кириллицей', 'settings/fabrics.json', (d) => d.colors.push({ slug: 'серый-2', name: 'Серый 2' }), 'строчная латиница');
+  neg('удалён цвет, который используется', 'settings/fabrics.json', (d) => { d.colors = d.colors.filter((c) => c.slug !== 'seryy'); }, 'запись удалена?');
+  neg('образец без шоурума', 'products/sofy--sofa-test.json', (d) => { d.samples = [{ material: 'velyur', discount_pct: 20 }]; }, 'обязательное поле не заполнено');
   neg('нет файла фото', 'products/sofy--sofa-test.json', (d) => { d.photos = ['/images/uploads/net-takogo.jpg']; }, 'нет файла картинки');
   // пустые пункты списков (Sveltia оставляет "" после удаления файла из медиатеки) не должны останавливать публикацию
   edit('products/sofy--sofa-test.json', (d) => { d.photos = ['', '']; d.faq = [{ q: '', a: '' }]; });

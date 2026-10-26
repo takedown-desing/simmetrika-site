@@ -30,6 +30,7 @@ export const rub = (n) => (n == null ? '' : Math.round(n).toLocaleString('ru-RU'
 export const variantPrice = (p, material = 'rogozhka') => (p.price_from ? Math.round((p.price_from * (MATERIAL[material]?.price_k || 1)) / 100) * 100 : null);
 export const priceText = (p, material = 'rogozhka', from = true) => (p.price_from ? `${from ? 'от ' : ''}${rub(variantPrice(p, material))}` : 'цена по запросу');
 export const productColors = () => Object.keys(COLOR_HEX).filter((c) => CAT.fabrics.some((f) => f.colors.includes(c)));
+export const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
 export const sizeStr = (p) => (p.length_cm ? [p.length_cm, p.depth_cm, p.height_cm].filter(Boolean).join('×') + ' см' : 'размеры по запросу');
 export const sleepStr = (p) => (p.sleeping ? `${p.sleeping.w}×${p.sleeping.l} см` : 'нет');
 export const bestSample = (p) => (p.samples || []).slice().sort((a, b) => b.discount_pct - a.discount_pct)[0] || null;

@@ -1,4 +1,4 @@
-import { SITE, canonical } from './site.mjs';
+import { SITE, canonical, pageTitle } from './site.mjs';
 import { showrooms, settings, img, variantPrice, products } from './catalog.mjs';
 const ORG = `${SITE.canonicalOrigin}/#organization`;
 export function graph(page, { product, faq, breadcrumbs, type } = {}) {
@@ -9,7 +9,7 @@ export function graph(page, { product, faq, breadcrumbs, type } = {}) {
     { '@type': 'WebSite', '@id': `${SITE.canonicalOrigin}/#website`, url: SITE.canonicalOrigin + '/', name: 'SIMMETRIKA', publisher: { '@id': ORG }, inLanguage: 'ru' },
   ];
   const pageType = { home: 'WebPage', hub: 'CollectionPage', category: 'CollectionPage', collection: 'CollectionPage', filter: 'CollectionPage', landing: 'CollectionPage', product: 'ItemPage', about: 'AboutPage', contact: 'ContactPage', 'news-list': 'CollectionPage', 'news-item': 'WebPage' }[type || d.type] || 'WebPage';
-  g.push({ '@type': pageType, '@id': url + '#webpage', url, name: d.title, description: d.description, isPartOf: { '@id': `${SITE.canonicalOrigin}/#website` }, inLanguage: 'ru', dateModified: d.date_modified ? String(d.date_modified).slice(0, 10) : undefined });
+  g.push({ '@type': pageType, '@id': url + '#webpage', url, name: pageTitle(d), description: d.description, isPartOf: { '@id': `${SITE.canonicalOrigin}/#website` }, inLanguage: 'ru', dateModified: d.date_modified ? String(d.date_modified).slice(0, 10) : undefined });
   if (breadcrumbs?.length) g.push({ '@type': 'BreadcrumbList', itemListElement: breadcrumbs.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.name, item: canonical(b.url) })) });
   if (product) {
     const p = product;

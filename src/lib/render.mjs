@@ -7,6 +7,8 @@ import {
 import { byUrl, loadPages, titleOf } from './content.mjs';
 
 export const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// у нового цвета может не быть своей страницы-подборки: тогда кружок без ссылки, а не битая ссылка
+const colorHref = (c) => (byUrl()[`/catalog/cvet/${c}/`] ? u(`/catalog/cvet/${c}/`) : '');
 const phoneHref = (p) => 'tel:' + String(p).replace(/[^\d+]/g, '');
 
 export function picture(src, alt = '', { cls = '', eager = false, sizes = '(min-width: 1000px) 400px, 100vw' } = {}) {
@@ -115,7 +117,7 @@ export function mapHtml() {
 export function swatches(materials = 'velyur,rogozhka,zhakkard') {
   return `<div class="sw-wrap">${materials.split(',').map((m) => MATERIAL[m.trim()]).filter(Boolean).map((f) => `<div class="sw-row">
     <p class="sw-name"><b>${esc(f.name)}</b> ${esc(f.props)}</p>
-    <p class="sw-dots">${f.colors.map((c) => `<a href="${u(`/catalog/cvet/${c}/`)}" class="sw" style="--sw:${COLOR_HEX[c]}" title="${esc(COLOR_NAME[c])}"><span class="sr">${esc(COLOR_NAME[c])}</span></a>`).join('')}</p>
+    <p class="sw-dots">${f.colors.map((c) => { const h = colorHref(c); const a = `class="sw" style="--sw:${COLOR_HEX[c]}" title="${esc(COLOR_NAME[c])}"><span class="sr">${esc(COLOR_NAME[c])}</span>`; return h ? `<a href="${h}" ${a}</a>` : `<span ${a}</span>`; }).join('')}</p>
   </div>`).join('')}</div>`;
 }
 
@@ -201,7 +203,7 @@ function barsHtml(kind, ctx = {}) {
   </div>`;
 }
 function paletteHtml(active) {
-  return `<div class="pal">${Object.entries(COLOR_HEX).map(([k, v]) => `<a class="pal-i ${k === active ? 'is-on' : ''}" href="${u(`/catalog/cvet/${k}/`)}"><span style="background:${v}"></span><b>${esc(COLOR_NAME[k])}</b><i>${esc(fabrics.filter((f) => f.colors.includes(k)).map((f) => f.name.toLowerCase()).join(', '))}</i></a>`).join('')}</div>`;
+  return `<div class="pal">${Object.entries(COLOR_HEX).map(([k, v]) => { const h = colorHref(k); const t = h ? 'a' : 'span'; return `<${t} class="pal-i ${k === active ? 'is-on' : ''}"${h ? ` href="${h}"` : ''}><span style="background:${v}"></span><b>${esc(COLOR_NAME[k])}</b><i>${esc(fabrics.filter((f) => f.colors.includes(k)).map((f) => f.name.toLowerCase()).join(', '))}</i></${t}>`; }).join('')}</div>`;
 }
 const body = (x, y, w, h, fill = 'var(--c-photo)') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="currentColor" stroke-width="2"/>`;
 const arrow = (x1, y, x2) => `<path d="M${x1} ${y}H${x2}M${x2 - 10} ${y - 7}L${x2} ${y}L${x2 - 10} ${y + 7}" stroke="var(--c-accent)" stroke-width="3" fill="none"/>`;

@@ -234,7 +234,7 @@ for (const p of site.pages) {
   const closed = d.noindex === true || /noindex/.test(d.robots || '') || !!d.canonical;
   if (!SEO_SKIP.has(d.type)) {
     const t = d.title || ''; const ds = d.description || ''; const h1 = d.h1 || '';
-    if (!t) issues.push('нет title (подставится «SIMMETRIKA»)');
+    if (!t) issues.push(`нет title (подставится «${h1 ? h1 + ' | SIMMETRIKA' : 'SIMMETRIKA'}»)`);
     else if (t.length > 65) issues.push(`title длинный: ${t.length} зн. (до 60–65)`);
     else if (t.length < 25) issues.push(`title короткий: ${t.length} зн. (50–60)`);
     if (!ds) issues.push('нет description');
@@ -276,6 +276,9 @@ for (const p of site.pages) {
   for (const b of [d.hero_cta?.primary, d.hero_cta?.secondary]) addIn(b?.href, from);
 }
 for (const it of [...(site.menu.nav || []), ...(site.menu.nav_right || []), ...(site.menu.catalog_menu || []).flatMap((c) => c.items || [])]) addIn(it.url, '');
+for (const c of site.catalog.categories) if (c.in_menu) addIn(c.url, ''); // категории сами дописываются в меню «Каталог товаров»
+// раздел сам показывает чипы на вложенные подборки (src/pages/[...slug].astro)
+for (const p of site.pages) if (['filter', 'collection'].includes(p.data.type) && p.data.url) { const par = p.data.url.replace(/[^/]+\/$/, ''); if (site.pages.some((x) => x.data.url === par && ['category', 'filter', 'collection'].includes(x.data.type))) addIn(p.data.url, par); }
 for (const p of site.pages) if (['collections', 'pages'].includes(p.col) && p.data.url && !SEO_SKIP.has(p.data.type) && p.data.url !== '/' && !(inbound.get(p.data.url) > 0)) {
   const row = seoRows.find((r) => r.url === p.data.url); const msg = 'на страницу нет ссылок: поставьте ссылку из текста соседних страниц, плиток или меню, иначе поиск её почти не найдёт';
   if (row) row.issues.push(msg); W(where(entryOf(p) || { col: p.col, file: p.file, rel: `${p.col}/${p.file}.json`, data: p.data }), msg);
@@ -283,7 +286,6 @@ for (const p of site.pages) if (['collections', 'pages'].includes(p.col) && p.da
 // меню и ручные переадресации
 for (const [k, list] of Object.entries({ nav: site.menu.nav, nav_right: site.menu.nav_right })) for (const it of list || []) if (!linkOk(it.url)) E(`Меню сайта › ${it.title}`, `страницы ${it.url} нет`);
 for (const col of site.menu.catalog_menu || []) for (const it of col.items || []) if (!linkOk(it.url)) E(`Меню «Каталог» › ${col.title} › ${it.title}`, `страницы ${it.url} нет`);
-for (const c of site.catalog.categories) if (!(site.menu.catalog_menu || []).some((col) => (col.items || []).some((it) => normUrl(it.url) === c.url)) && c.in_menu) W(`Категория «${c.name}»`, 'нет в меню «Каталог товаров»: добавьте ссылку в «Настройки → Меню сайта»');
 for (const r of site.redirects) {
   if (!r.from || !r.to) { E('Переадресации', `пустая строка: ${r.from || '?'} → ${r.to || '?'}`); continue; }
   if (!linkOk(r.to)) E(`Переадресации › ${r.from}`, `цель ${r.to} не существует`);
@@ -291,6 +293,12 @@ for (const r of site.redirects) {
 }
 for (const s of site.catalog.showrooms) if (typeof s.lat !== 'number' || typeof s.lon !== 'number') W(`Шоурум «${s.name}»`, 'нет координат: точка не покажется на карте');
 for (const f of site.catalog.fabrics) for (const c of f.colors || []) if (!COL.has(c)) E(`Материал «${f.name}»`, `цвет «${c}» не найден в списке цветов`);
+// коды в справочниках без повторов: второй цвет или шоурум с тем же кодом молча заменил бы первый
+for (const [file, k, key, lbl] of [['fabrics', 'fabrics', 'material', 'Материалы обивки'], ['fabrics', 'colors', 'slug', 'Цвета'], ['fabrics', 'mechanisms', 'slug', 'Механизмы'], ['showrooms', 'showrooms', 'slug', 'Шоурумы']]) {
+  let d = {}; try { d = JSON.parse(fs.readFileSync(`src/cms/settings/${file}.json`, 'utf8')); } catch {}
+  const seen = new Set();
+  for (const x of d[k] || []) { const v = x?.[key]; if (!v) continue; if (seen.has(v)) E(`Настройки › ${lbl} › ${x.name || v}`, `код «${v}» уже есть у другой записи: у каждой свой код`); seen.add(v); if (k === 'colors' && !x.hex) W(`Настройки › ${lbl} › ${x.name || v}`, 'не выбран «Цвет кружка»: на сайте кружок будет серым'); }
+}
 finish();
 
 function finish() {

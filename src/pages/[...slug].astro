@@ -7,7 +7,7 @@ import { loadPages, byUrl, titleOf } from '../lib/content.mjs';
 import { renderMd } from '../lib/md.mjs';
 import { graph } from '../lib/schema.mjs';
 import { u } from '../lib/site.mjs';
-import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select } from '../lib/catalog.mjs';
+import { products, CATEGORY, MATERIAL, COLOR_HEX, COLOR_NAME, SHOWROOM, settings, img, rub, variantPrice, priceText, sizeStr, sleepStr, select, fabrics, productColors, plural } from '../lib/catalog.mjs';
 import { picture, productCard, showroomsHtml, cartPayload, esc, productsGrid, filtersHtml, chips } from '../lib/render.mjs';
 import { cardifySections as cardify, cardify as cardifyOne } from '../lib/layout.mjs';
 
@@ -59,7 +59,7 @@ const keySpecs = p ? [
   { ico: IC.bed, label: 'Спальное место', value: p.sleeping ? `${p.sleeping.w}×${p.sleeping.l} см` : 'нет' },
   { ico: IC.mech, label: 'Механизм', value: p.mechanism_name },
   ...(p.category === 'kresla' ? [] : [{ ico: IC.box, label: 'Ящик для белья', value: p.has_storage ? 'есть' : 'нет' }]),
-  { ico: IC.fabric, label: 'Обивка', value: '3 ткани, 10 цветов' },
+  { ico: IC.fabric, label: 'Обивка', value: `${fabrics.length} ${plural(fabrics.length, 'ткань', 'ткани', 'тканей')}, ${productColors().length} ${plural(productColors().length, 'цвет', 'цвета', 'цветов')}` },
   { ico: IC.time, label: 'Изготовление', value: p.in_stock ? `в наличии, ${settings.delivery.in_stock_days} дня` : `${settings.delivery.made_to_order_days} дней` },
   { ico: IC.shield, label: 'Гарантия', value: `${p.warranty_months} месяцев` },
 ] : [];
@@ -71,7 +71,10 @@ const thin = ['filter', 'collection'].includes(type) && ruleStr && select(ruleSt
 // подборки, вложенные в раздел по адресу (/catalog/x/ → /catalog/x/y/), на которые текст раздела ещё не ссылается: чипы сверху, чтобы новая подборка из админки не осталась без ссылок
 const kids = ['category', 'filter', 'collection'].includes(type) && d.url ? Object.keys(byUrl()).filter((k) => k !== d.url && k.startsWith(d.url) && k.slice(d.url.length).split('/').filter(Boolean).length === 1 && ['filter', 'collection'].includes(byUrl()[k].data.type) && !(page.body || '').includes(k)) : [];
 const kidsHtml = kids.length ? chips(kids) : '';
-const bodyHtml = !isProduct && !isCart ? kidsHtml + autoGrid + cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) : '';
+// новость: «Товары по теме» из админки карточками после текста (скрытые и удалённые товары отпадают ещё в cms.mjs)
+const newsProducts = type === 'news-item' ? (d.product_ids || []).map((id) => products.find((x) => x.id === id)).filter(Boolean) : [];
+const newsGrid = newsProducts.length ? `<section class="sec"><h2>Товары по теме</h2><div class="pgrid">${newsProducts.map((x) => productCard(x)).join('')}</div></section>` : '';
+const bodyHtml = !isProduct && !isCart ? kidsHtml + autoGrid + cardify(renderMd(page.body, { category: d.listing?.rule?.category, rule: d.listing?.rule })) + newsGrid : '';
 const schema = isCart ? null : graph(page, { faq: d.faq, breadcrumbs: crumbs, product: p, type });
 const og = d.images?.find((x) => x.slot === 'hero' && x.src)?.src || d.cover || p?.photos?.[0];
 const ui = d.ui_texts || {};

@@ -16,9 +16,15 @@ export const u = (p = '/') => {
   return full + (hash ? '#' + hash : '');
 };
 export const canonical = (p) => SITE.canonicalOrigin + p;
-import { cms, redirectList } from './cms.mjs';
+import { cms, redirectList, normUrl } from './cms.mjs';
 // меню правится в админке: Настройки → Меню сайта
 const MENU = cms().menu;
 export const NAV = MENU.nav || [];
 export const NAV_RIGHT = MENU.nav_right || [];
-export const CATALOG_MENU = MENU.catalog_menu || [];
+const MENU_COLS = MENU.catalog_menu || [];
+// категории с галочкой «Показывать в меню», которых нет в меню вручную, дописываются в конец первой колонки
+const inMenu = new Set(MENU_COLS.flatMap((g) => (g.items || []).map((i) => normUrl(i.url))));
+const missing = cms().catalog.categories.filter((c) => c.in_menu && !inMenu.has(c.url)).map((c) => ({ title: c.name, url: c.url }));
+export const CATALOG_MENU = missing.length && MENU_COLS.length ? MENU_COLS.map((g, i) => (i ? g : { ...g, items: [...(g.items || []), ...missing] })) : MENU_COLS;
+// заголовок вкладки: если title пуст, «H1 | SIMMETRIKA»
+export const pageTitle = (d = {}) => (d.title || (d.h1 ? `${d.h1} | SIMMETRIKA` : 'SIMMETRIKA')).replace(/—/g, '–');

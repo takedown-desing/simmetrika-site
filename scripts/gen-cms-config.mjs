@@ -42,6 +42,7 @@ const list = (name, label, fields, x = {}) => ({ name, label, widget: 'list', re
 const plist = (name, label, field, x = {}) => ({ name, label, widget: 'list', required: false, collapsed: true, field, ...x });
 const obj = (name, label, fields, x = {}) => ({ name, label, widget: 'object', required: false, collapsed: true, fields, ...x });
 const SLUG_P = ['^[a-z0-9]+(-[a-z0-9]+)*$', 'Только строчная латиница, цифры и дефис, например divan-milano'];
+const CODE_P = [SLUG_P[0], 'Только строчная латиница, цифры и дефис, например grafit'];
 const URL_P = ['^/([a-z0-9]+(-[a-z0-9]+)*/)*$', 'Адрес вида /garantiya/ или /catalog/velyur/: строчная латиница, слэш в начале и в конце'];
 const go = (c) => `${BASE ? BASE + '/' : ''}go/${c}/{{slug}}/`;
 
@@ -68,11 +69,11 @@ const ctaBtn = (n, l) => obj(n, l, [str('label', 'Текст кнопки'), str
 const pageFields = [
   str('eyebrow', 'Надзаголовок (маленькая красная строка над H1)'),
   txt('lede', 'Подзаголовок под H1 (лид)', { hint: '1–2 предложения, до 220 знаков' }),
-  list('highlights', 'Цифры под заголовком (3–4 плитки)', [str('value', 'Значение', { hint: '8 моделей' }), str('label', 'Подпись')], { label_singular: 'Цифра', summary: '{{fields.value}} {{fields.label}}' }),
+  list('highlights', 'Цифры под заголовком (3–4 плитки)', [str('value', 'Значение', { hint: 'Например: 8 моделей' }), str('label', 'Подпись')], { label_singular: 'Цифра', summary: '{{fields.value}} {{fields.label}}' }),
   obj('hero_cta', 'Кнопки под заголовком', [ctaBtn('primary', 'Главная кнопка'), ctaBtn('secondary', 'Вторая кнопка')]),
   txt('body', 'Текст страницы', { hint: DIRECTIVES }),
   ...faq,
-  list('related', 'Блок «Смотрите также»', [str('url', 'Адрес', { hint: '/catalog/divany-krovati/' }), str('title', 'Заголовок'), str('text', 'Одна строка')], { label_singular: 'Ссылка', summary: '{{fields.title}}' }),
+  list('related', 'Блок «Смотрите также»', [str('url', 'Адрес', { hint: 'Например: /catalog/divany-krovati/' }), str('title', 'Заголовок'), str('text', 'Одна строка')], { label_singular: 'Ссылка', summary: '{{fields.title}}' }),
   list('images', 'Картинки страницы', [str('slot', 'Место', { hint: 'hero: первый экран; tile-…: плитки; inline-1: в тексте' }), img('src', 'Файл'), str('alt', 'Описание картинки (alt)', { hint: 'Что на фото, с названием модели' }), hid('query'), hid('kind')], { label_singular: 'Картинка', summary: '{{fields.slot}}' }),
 ];
 const internal = ['secondary_kws', 'assumptions', 'date_modified', 'breadcrumbs'].map(hid);
@@ -101,8 +102,8 @@ const config = {
       sortable_fields: ['name', 'category', 'order', 'price_from'], view_groups: [{ label: 'По категории', field: 'category' }, { label: 'Скрытые', field: 'hidden' }],
       description: 'Карточка товара: адрес /catalog/<категория>/<адрес>/. Цена «от» указывается для рогожки, велюр и жаккард пересчитываются коэффициентами из «Ткани и цвета». Без цены на сайте «цена по запросу».',
       fields: [
-        str('name', 'Название модели', { required: true, hint: 'Эджио' }),
-        str('slug', 'Адрес (латиницей)', { required: true, pattern: SLUG_P, hint: 'edzhio → /catalog/pryamye-divany/edzhio/. Смена адреса опубликованного товара создаёт переадресацию автоматически' }),
+        str('name', 'Название модели', { required: true, hint: 'Например: Эджио' }),
+        str('slug', 'Адрес (латиницей)', { required: true, pattern: SLUG_P, hint: 'Например: edzhio → /catalog/pryamye-divany/edzhio/. Смена адреса опубликованного товара создаёт переадресацию автоматически' }),
         REL_CAT({ required: true, hint: 'Новая категория появится в списке сразу после её сохранения' }),
         bool('hidden', 'Скрыть с сайта', false, { hint: 'Карточка пропадёт с сайта, старый адрес переадресуется в категорию' }),
         num('order', 'Порядок в каталоге', { hint: 'Меньше: выше' }),
@@ -110,17 +111,17 @@ const config = {
         bool('is_hit', 'Хит продаж (на главной)'),
         sel('tags', 'Метки для подборок', TAG_OPTS, { multiple: true }),
         REL_MECH({ label: 'Механизм трансформации', default: 'none', required: true }),
-        obj('sleeping', 'Спальное место, см', [num('w', 'Ширина'), num('l', 'Длина')], { hint: 'Пусто: без спального места' }),
+        obj('sleeping', 'Спальное место, см', [num('w', 'Ширина'), num('l', 'Длина')], { collapsed: false, hint: 'Пусто: без спального места' }),
         num('length_cm', 'Длина, см'), num('depth_cm', 'Глубина, см'), num('height_cm', 'Высота, см'), num('seat_height_cm', 'Высота посадки, см'),
         bool('has_storage', 'Есть ящик для белья'), bool('sides', 'Угловой: выбор стороны угла (левый/правый)'),
         str('lead_time_days', 'Срок изготовления, дней', { default: '14–21' }),
-        obj('in_stock', 'В наличии на складе', [REL_MAT('material', 'Материал'), REL_COLOR()], { hint: 'Пусто: «под заказ»' }),
+        obj('in_stock', 'В наличии на складе', [REL_MAT('material', 'Материал'), REL_COLOR()], { collapsed: false, hint: 'Пусто: «под заказ»' }),
         num('warranty_months', 'Гарантия, месяцев', { default: 18 }),
-        str('model_family', 'Семейство модели', { hint: 'Одинаковое у исполнений одной модели в разных категориях (edzhio): блок «Эта модель в других исполнениях»' }),
+        str('model_family', 'Семейство модели', { hint: 'Одинаковое у исполнений одной модели в разных категориях (например, edzhio): блок «Эта модель в других исполнениях»' }),
         plist('modules', 'Модули (для модульных)', str('m', 'Модуль')),
         plist('photos', 'Фото (первое будет главным)', img('p', 'Фото', { hint: 'JPG/WebP 1200–1600 px по длинной стороне' }), { collapsed: false }),
-        str('alt_template', 'Шаблон alt для фото', { hint: 'Прямой диван Эджио, {материал} {цвет}: подставятся выбранные ткань и цвет' }),
-        list('samples', 'Выставочные образцы (распродажа)', [REL_SHOW(), REL_MAT('material', 'Материал'), REL_COLOR(), num('discount_pct', 'Скидка, %'), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'Образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
+        str('alt_template', 'Шаблон alt для фото', { hint: 'Например: Прямой диван Эджио, {материал} {цвет}: подставятся выбранные ткань и цвет' }),
+        list('samples', 'Выставочные образцы (распродажа)', [REL_SHOW({ required: true }), REL_MAT('material', 'Материал'), REL_COLOR(), num('discount_pct', 'Скидка, %', { required: true, min: 1, max: 90, hint: 'Без шоурума и скидки образец на сайт не попадёт' }), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'Образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
         txt('construction', 'Конструкция (каркас, наполнитель, опоры)'),
         ...seo,
         txt('lede', 'Подзаголовок карточки'),
@@ -133,10 +134,10 @@ const config = {
     {
       name: 'categories', label: 'Категории каталога', label_singular: 'Категория', folder: 'src/cms/categories', create: true, delete: true, format: 'json', extension: 'json',
       identifier_field: 'name', slug: '{{fields.slug}}', summary: '{{name}} · /catalog/{{slug}}/', preview_path: go('categories'), sortable_fields: ['order', 'name'],
-      description: 'Категория = страница /catalog/<адрес>/ со всеми товарами, у которых выбрана эта категория. Новая категория сразу появится в выборе категории у товаров (после публикации).',
+      description: 'Категория = страница /catalog/<адрес>/ со всеми товарами, у которых выбрана эта категория. Новая категория появится в выборе категории у товаров сразу после сохранения и сама добавится в меню «Каталог товаров».',
       fields: [
-        str('name', 'Название', { required: true }), str('slug', 'Адрес (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'pryamye-divany → /catalog/pryamye-divany/' }),
-        num('order', 'Порядок'), bool('in_menu', 'Показывать в меню', true), bool('hidden', 'Скрыть с сайта'),
+        str('name', 'Название', { required: true }), str('slug', 'Адрес (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'Например: pryamye-divany → /catalog/pryamye-divany/' }),
+        num('order', 'Порядок'), bool('in_menu', 'Показывать в меню «Каталог товаров»', true, { hint: 'Если категории нет в «Настройки → Меню сайта», она добавится в конец первой колонки' }), bool('hidden', 'Скрыть с сайта'),
         ...seo, ...pageFields, hid('listing'), ...internal,
       ],
     },
@@ -145,7 +146,7 @@ const config = {
       identifier_field: 'h1', slug: '{{fields.url}}', summary: '{{h1}} · {{url}}', preview_path: go('collections'), sortable_fields: ['url', 'h1'],
       description: 'SEO-подборки: диваны-кровати, механизмы, ткани, цвета, «для гостиной», «в наличии». Товары отбираются автоматически по правилу. Подборка, в которую попало меньше 3 товаров, закрывается от индексации.',
       fields: [
-        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: '/catalog/divany-krovati/pantograf/: латиница, со слэшами' }),
+        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: 'Например: /catalog/divany-krovati/pantograf/: латиница, со слэшами' }),
         sel('type', 'Тип', [opt('collection', 'Подборка'), opt('filter', 'Фильтр-посадочная')], { default: 'filter', required: true }),
         bool('hidden', 'Скрыть с сайта'),
         obj('listing', 'Какие товары показывать', [obj('rule', 'Правило отбора (все условия вместе)', ruleFields, { collapsed: false, required: true }), sel('sort_default', 'Сортировка', [opt('popularity', 'По популярности'), opt('price_asc', 'Дешевле'), opt('price_desc', 'Дороже'), opt('discount', 'По скидке')], { default: 'popularity' })], { collapsed: false, required: true }),
@@ -158,8 +159,8 @@ const config = {
       identifier_field: 'h1', slug: '{{fields.id}}', summary: '{{h1}} · {{url}}', preview_path: go('pages'), sortable_fields: ['url', 'h1'],
       description: 'Главная, каталог, распродажа, «на заказ», доставка, о фабрике, контакты, новости (список), заявка, политика, 404 и любые новые страницы (гарантия, акции, статьи). Новая страница: заполните «Код страницы», адрес и H1.',
       fields: [
-        str('id', 'Код страницы (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'garantiya: имя файла записи' }),
-        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: '/garantiya/: латиница, со слэшами' }),
+        str('id', 'Код страницы (латиницей)', { required: true, unique: true, pattern: SLUG_P, hint: 'Например: garantiya (имя файла записи)' }),
+        str('url', 'Адрес страницы', { required: true, unique: true, pattern: URL_P, hint: 'Например: /garantiya/: латиница, со слэшами' }),
         sel('type', 'Шаблон', [opt('service', 'Текстовая страница'), opt('landing', 'Посадочная с товарами'), opt('about', 'О компании'), opt('contact', 'Контакты'), opt('hub', 'Каталог (хаб)'), opt('home', 'Главная'), opt('news-list', 'Список новостей'), opt('legal', 'Документ (политика)'), opt('cart', 'Заявка (служебная)'), opt('error', 'Ошибка 404 (служебная)')], { default: 'service', required: true }),
         bool('hidden', 'Скрыть с сайта'),
         ...seo, str('robots', 'Robots (служебное)'),
@@ -187,7 +188,7 @@ const config = {
       name: 'settings', label: 'Настройки сайта', files: [
         { name: 'company', label: 'Компания и контакты', file: 'src/cms/settings/company.json', format: 'json', fields: [
           str('brand', 'Название', { required: true }), str('phone_main', 'Основной телефон', { required: true }), str('phone_second', 'Второй телефон'), str('email', 'E-mail'), str('vk', 'Группа ВКонтакте (ссылка)'),
-          str('work_hours_calls', 'Часы приёма звонков', { hint: '10:00–21:00' }), str('callback_promise', 'Обещание перезвона', { hint: 'перезвоним в течение 1 часа…' }),
+          str('work_hours_calls', 'Часы приёма звонков', { hint: 'Например: 10:00–21:00' }), str('callback_promise', 'Обещание перезвона', { hint: 'Например: перезвоним в течение 1 часа…' }),
           num('warranty_months', 'Гарантия по умолчанию, месяцев'), num('service_life_years', 'Срок службы, лет'), txt('legal', 'Реквизиты'), txt('preview_note', 'Плашка сверху сайта', { hint: 'Пусто: плашки нет' }),
         ] },
         { name: 'delivery', label: 'Доставка и оплата (цифры)', file: 'src/cms/settings/delivery.json', format: 'json', fields: [
@@ -196,12 +197,12 @@ const config = {
           plist('payment', 'Способы оплаты', str('p', 'Способ')), num('region_limit_km', 'Доставка по области до, км'),
         ] },
         { name: 'showrooms', label: 'Шоурумы', file: 'src/cms/settings/showrooms.json', format: 'json', fields: [
-          list('showrooms', 'Шоурумы', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('address', 'Адрес', { required: true }), str('hours', 'Часы работы'), str('phone', 'Телефон'), bool('is_main', 'Главный шоурум'), bool('hidden', 'Скрыть'), { name: 'lat', label: 'Широта', widget: 'number', value_type: 'float', required: false }, { name: 'lon', label: 'Долгота', widget: 'number', value_type: 'float', required: false }], { label_singular: 'Шоурум', summary: '{{fields.name}}', collapsed: false }),
+          list('showrooms', 'Шоурумы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('address', 'Адрес', { required: true }), str('hours', 'Часы работы'), str('phone', 'Телефон'), bool('is_main', 'Главный шоурум'), bool('hidden', 'Скрыть'), { name: 'lat', label: 'Широта', widget: 'number', value_type: 'float', required: false }, { name: 'lon', label: 'Долгота', widget: 'number', value_type: 'float', required: false }], { label_singular: 'Шоурум', summary: '{{fields.name}}', collapsed: false }),
         ] },
         { name: 'fabrics', label: 'Ткани, цвета, механизмы', file: 'src/cms/settings/fabrics.json', format: 'json', fields: [
-          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, REL_COLOR('colors', 'Доступные цвета', { multiple: true }), str('props', 'Свойства')], { label_singular: 'Материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
-          list('colors', 'Цвета', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true }), str('plural', 'Во множественном числе («Серые»)'), { name: 'hex', label: 'Цвет кружка', widget: 'color', required: false }], { label_singular: 'Цвет', summary: '{{fields.name}}' }),
-          list('mechanisms', 'Механизмы', [str('slug', 'Код (латиницей)', { required: true }), str('name', 'Название', { required: true })], { label_singular: 'Механизм', summary: '{{fields.name}}' }),
+          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, REL_COLOR('colors', 'Доступные цвета', { multiple: true }), str('props', 'Свойства')], { label_singular: 'Материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
+          list('colors', 'Цвета', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('plural', 'Во множественном числе («Серые»)'), { name: 'hex', label: 'Цвет кружка', widget: 'color', required: false }], { label_singular: 'Цвет', summary: '{{fields.name}}' }),
+          list('mechanisms', 'Механизмы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true })], { label_singular: 'Механизм', summary: '{{fields.name}}' }),
         ] },
         { name: 'menu', label: 'Меню сайта', file: 'src/cms/settings/menu.json', format: 'json', fields: [
           list('nav', 'Меню слева от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true }), bool('accent', 'Выделить красным')], { label_singular: 'пункт', summary: '{{fields.title}}' }),
@@ -209,7 +210,7 @@ const config = {
           list('catalog_menu', 'Меню «Каталог товаров» (колонки)', [str('title', 'Заголовок колонки', { required: true }), list('items', 'Ссылки', [str('title', 'Текст', { required: true }), str('url', 'Адрес', { required: true })], { label_singular: 'ссылку', summary: '{{fields.title}}' })], { label_singular: 'колонку', summary: '{{fields.title}}' }),
         ] },
         { name: 'redirects', label: 'Переадресации', file: 'src/cms/settings/redirects.json', format: 'json', fields: [
-          list('redirects', 'Ручные переадресации', [str('from', 'Старый адрес', { hint: '/akcii/ или /straight.html' }), str('to', 'Куда вести', { hint: '/sale/' })], { label_singular: 'переадресацию', summary: '{{fields.from}} → {{fields.to}}', hint: 'При смене адреса, скрытии или удалении записи переадресация ставится автоматически. Сюда: только особые случаи.' }),
+          list('redirects', 'Ручные переадресации', [str('from', 'Старый адрес', { hint: 'Например: /akcii/ или /straight.html' }), str('to', 'Куда вести', { hint: 'Например: /sale/' })], { label_singular: 'переадресацию', summary: '{{fields.from}} → {{fields.to}}', hint: 'При смене адреса, скрытии или удалении записи переадресация ставится автоматически. Сюда: только особые случаи.' }),
         ] },
       ],
     },

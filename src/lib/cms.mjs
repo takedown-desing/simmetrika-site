@@ -66,7 +66,7 @@ export function cms() {
     categories: categories.map(({ _entry, ...c }) => c),
     mechanisms: MECH,
     colors: Object.fromEntries((fab.colors || []).map((c) => [c.slug, c.name])),
-    color_hex: Object.fromEntries((fab.colors || []).map((c) => [c.slug, c.hex])),
+    color_hex: Object.fromEntries((fab.colors || []).map((c) => [c.slug, c.hex || '#c8c8c8'])), // без «Цвета кружка»: серый
     color_plural: Object.fromEntries((fab.colors || []).map((c) => [c.slug, c.plural || c.name])),
     fabrics: fab.fabrics || [],
     products,
