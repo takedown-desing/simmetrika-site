@@ -307,6 +307,11 @@ function finish() {
   if (!QUIET) out(warns.slice(0, REPORT ? 0 : 400), 'замечание');
   console.log(`[validate-cms] ошибок: ${errors.length}, замечаний: ${warns.length}`);
   if (REPORT) writeReport();
+  // в GitHub Actions причина видна на первой странице запуска (плашка «Публикация» в админке ведёт туда)
+  if (process.env.GITHUB_ACTIONS && errors.length) {
+    for (const x of errors) console.log(`::error title=Сайт не опубликован::${x.where}: ${x.msg}`);
+    if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Сайт не опубликован, ошибок: ${errors.length}\n\nСайт работает в прежнем виде. Исправьте записи в админке и снова нажмите «Опубликовать изменения».\n\n${errors.map((x) => `- **${x.where}**: ${x.msg}`).join('\n')}\n`);
+  }
   process.exit(errors.length ? 1 : 0);
 }
 

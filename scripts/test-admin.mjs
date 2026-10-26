@@ -19,7 +19,7 @@ const step = (t) => console.log(`\n▸ ${t}`);
 // ── копия сайта ──
 fs.cpSync(ROOT, TMP, { recursive: true, filter: (src) => !/[/\\](node_modules|dist|\.git|\.astro)([/\\]|$)/.test(path.relative(ROOT, src) ? '/' + path.relative(ROOT, src) : '') });
 fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(TMP, 'node_modules'), 'dir');
-const run = (cmd, args, env = {}) => { const r = spawnSync(cmd, args, { cwd: TMP, encoding: 'utf8', env: { ...process.env, ...env } }); return { code: r.status, out: (r.stdout || '') + (r.stderr || '') }; };
+const run = (cmd, args, env = {}) => { const r = spawnSync(cmd, args, { cwd: TMP, encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: '', GITHUB_STEP_SUMMARY: '', ...env } }); return { code: r.status, out: (r.stdout || '') + (r.stderr || '') }; };
 const build = (env) => run('npm', ['run', 'build'], env);
 const validate = () => run('sh', ['-c', 'node scripts/gen-cms-config.mjs && node scripts/validate-cms.mjs --quiet']);
 const P = (...a) => path.join(TMP, ...a);
