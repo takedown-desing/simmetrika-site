@@ -51,7 +51,7 @@ const DIRECTIVES = 'Текст в формате Markdown: ## Заголовок
   + ':::filters: фильтры; :::tiles{items="/catalog/velyur/,/sale/"}: плитки разделов; :::chips{items="…"}: ссылки-чипы; :::spec-table{rule="…"}: таблица размеров; '
   + ':::swatches: ткани; :::showrooms: шоурумы; :::map: карта; :::news{limit="3"}: новости; :::form{type="question"}: форма; '
   + ':::steps{title="…"} список шагов :::, :::compare{title="…"} таблица :::, :::cta{href="/na-zakaz/" label="…"} призыв :::, :::note заметка :::, :::scheme{kind="mechanisms"} схема :::. '
-  + 'Ошибки в тексте покажет страница «SEO-проверка» в админке.';
+  + 'Ошибка во вставке остановит публикацию, сайт останется прежним.';
 
 // SEO-блок: одинаков для всех страниц
 const seo = [

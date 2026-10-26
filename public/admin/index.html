@@ -10,15 +10,6 @@
   <style>
     /* Sveltia запрещает выделение текста во всём интерфейсе; разрешаем копировать подписи, подсказки и тексты */
     body, body *:not(button):not([role="button"]):not([role="tab"]):not([draggable="true"]) { -webkit-user-select: text !important; user-select: text !important; }
-    .cms-bar { position: fixed; right: 64px; bottom: 12px; z-index: 2147483000; display: flex; gap: 8px; }
-    .cms-bar a { padding: 6px 12px; border-radius: 999px; background: #37474f; color: #fff; font: 600 13px/1.2 -apple-system, Segoe UI, Arial, sans-serif; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-    /* красный только у «Публикация не прошла», чтобы ошибку не путали с кнопкой SEO-проверки */
-    .cms-bar .pub { background: #757575; } .cms-bar .pub.ok { background: #2e7d32; } .cms-bar .pub.fail { background: #c8102e; outline: 2px solid #fff; }
-    .cms-bar .pub.fail::before { content: '⚠ '; }
-    .cms-bar .pub[hidden] { display: none; }
-    /* на телефоне у Sveltia снизу панель разделов, справа над ней круглая кнопка «Создать»: плашка публикации слева, SEO-проверка только на компьютере;
-       в открытой записи плашка прячется, иначе ложится на поля формы */
-    @media (max-width: 700px) { .cms-bar { right: auto; left: 8px; bottom: 76px; } .cms-bar a { padding: 4px 10px; font-size: 12px; } .cms-bar .seo-link { display: none; } body:has(section.field[data-key-path]) .cms-bar { display: none; } }
   </style>
   <script>
     // обычное меню браузера по правому клику («Копировать», «Вставить», «Открыть ссылку») вместо меню Sveltia
@@ -28,30 +19,5 @@
 <body>
   <!-- Sveltia CMS: правки сохраняются коммитами в GitHub-репозиторий сайта, сайт пересобирается по кнопке «Опубликовать изменения» -->
   <script src="https://unpkg.com/@sveltia/cms@0.250.2/dist/sveltia-cms.js"></script>
-  <div class="cms-bar">
-    <a class="pub" id="pub" hidden target="_blank" rel="noopener"></a>
-    <a class="seo-link" href="./seo/" target="_blank" rel="noopener" title="Ошибки и SEO-замечания по всем страницам после последней публикации">SEO-проверка</a>
-  </div>
-  <script>
-    // итог последней публикации (запуск deploy.yml); запрос с токеном, под которым вошли в админку (без него GitHub даёт 60 запросов в час на IP)
-    (function () {
-      var el = document.getElementById('pub');
-      var api = 'https://api.github.com/repos/takedown-desing/simmetrika-site/actions/workflows/deploy.yml/runs?per_page=1';
-      var when = function (s) { return new Date(s).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); };
-      function check() {
-        if (document.hidden) return;
-        var token = ''; try { token = JSON.parse(localStorage.getItem('sveltia-cms.user') || '{}').token || ''; } catch (e) {}
-        fetch(api, token ? { headers: { Authorization: 'Bearer ' + token } } : {}).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-          var run = d && d.workflow_runs && d.workflow_runs[0];
-          if (!run) return;
-          el.href = run.html_url; el.hidden = false; el.className = 'pub';
-          if (run.status !== 'completed') { el.textContent = 'Публикация: идёт сборка…'; el.title = 'Сайт обновится через 2–3 минуты'; }
-          else if (run.conclusion === 'success') { el.className = 'pub ok'; el.textContent = 'Опубликовано ' + when(run.updated_at); el.title = 'Последняя публикация прошла, сайт обновлён'; }
-          else { el.className = 'pub fail'; el.textContent = 'Публикация не прошла: причина'; el.title = 'Сайт работает в прежнем виде. Откройте, причина вверху страницы'; }
-        }).catch(function () {});
-      }
-      check(); setInterval(check, 90000); document.addEventListener('visibilitychange', check);
-    })();
-  </script>
 </body>
 </html>

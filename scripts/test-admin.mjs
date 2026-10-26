@@ -71,7 +71,7 @@ try {
   } else console.log(`  ! схема Sveltia ${ver} недоступна (нет сети): проверка конфига по схеме пропущена`);
   ok(cfg.backend.repo === 'takedown-desing/simmetrika-site' && cfg.backend.name === 'github', 'бэкенд: GitHub, репозиторий сайта');
   ok(fs.existsSync(P('dist/admin/index.html')) && fs.existsSync(P('dist/admin/config.yml')), 'админка попадает в сборку: /admin/ и config.yml');
-  ok(fs.existsSync(P('dist/admin/seo/index.html')), 'SEO-отчёт собран: /admin/seo/');
+  ok(fs.existsSync(P('seo-report/index.html')) && !fs.existsSync(P('dist/admin/seo')), 'SEO-отчёт собран локально, на сайт не попадает');
   ok(!fs.existsSync(P('dist/cms-state.json')), 'служебный cms-state.json удалён из сборки');
   ok(refreshTo(page('/go/products/pryamye-divany--edzhio/')) === `${BASE}/catalog/pryamye-divany/edzhio/`, 'кнопка «Открыть на сайте»: /go/ ведёт на карточку');
   ok(refreshTo(page('/straight.html')) === `${BASE}/catalog/pryamye-divany/`, 'ручная переадресация со старого сайта: /straight.html → прямые диваны');
@@ -148,8 +148,8 @@ try {
   ok(!!h && stockLinks.size === stockN, `подборка по правилу (прямые + в наличии): ${stockLinks.size} карточек, ожидалось ${stockN}`);
   const longN = prods.filter((p) => p.category === 'uglovye-divany' && p.length_cm >= 330).length;
   ok(new Set(cardLinks(page('/catalog/uglovye-divany/ot-330-sm/'))).size === longN, `подборка «длина от 330»: ${longN} карточек`);
-  ok(fs.readFileSync(P('dist/admin/seo/index.html'), 'utf8').includes('/garantiya/'), 'SEO-отчёт видит новую страницу');
-  const rep = JSON.parse(fs.readFileSync(P('dist/admin/seo/report.json'), 'utf8'));
+  ok(fs.readFileSync(P('seo-report/index.html'), 'utf8').includes('/garantiya/'), 'SEO-отчёт видит новую страницу');
+  const rep = JSON.parse(fs.readFileSync(P('seo-report/report.json'), 'utf8'));
   ok(rep.pages.find((x) => x.url === '/sirota/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: страница без входящих ссылок помечена');
   ok(!rep.pages.find((x) => x.url === '/garantiya/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: страница со ссылкой из меню не считается сиротой');
   ok(!rep.pages.find((x) => x.url === '/catalog/pryamye-divany/rogozhka/')?.issues.some((i) => i.includes('нет ссылок')), 'SEO-отчёт: подборка с чипом в разделе не считается сиротой');

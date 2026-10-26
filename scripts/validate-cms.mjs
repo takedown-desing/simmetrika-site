@@ -1,4 +1,4 @@
-// Проверка данных админки перед сборкой (npm run validate, prebuild) и SEO-отчёт после неё (--report → dist/admin/seo/).
+// Проверка данных админки перед сборкой (npm run validate, prebuild) и SEO-отчёт после неё (--report → seo-report/: только локально для тестов и SEO-специалиста, на сайт не публикуется).
 // ОШИБКИ (сборка останавливается, сайт остаётся прежним): битый JSON, пустые обязательные поля, неверный адрес,
 //   дубль адреса, значение не из списка, неизвестная вставка :::, незакрытая вставка, неверное правило отбора,
 //   ссылка на несуществующую страницу, нет файла картинки, пустой вопрос/ответ FAQ, поле, которого нет в админке.
@@ -307,7 +307,7 @@ function finish() {
   if (!QUIET) out(warns.slice(0, REPORT ? 0 : 400), 'замечание');
   console.log(`[validate-cms] ошибок: ${errors.length}, замечаний: ${warns.length}`);
   if (REPORT) writeReport();
-  // в GitHub Actions причина видна на первой странице запуска (плашка «Публикация» в админке ведёт туда)
+  // в GitHub Actions причина видна на первой странице запуска
   if (process.env.GITHUB_ACTIONS && errors.length) {
     for (const x of errors) console.log(`::error title=Сайт не опубликован::${x.where}: ${x.msg}`);
     if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Сайт не опубликован, ошибок: ${errors.length}\n\nСайт работает в прежнем виде. Исправьте записи в админке и снова нажмите «Опубликовать изменения».\n\n${errors.map((x) => `- **${x.where}**: ${x.msg}`).join('\n')}\n`);
@@ -331,8 +331,8 @@ ${rows.map((r) => `<tr><td><a href="../../${esc(r.url.slice(1))}" target="_blank
 </tbody></table></div>
 <h2>Прочие замечания</h2><ul>${warns.filter((w) => !rows.some((r) => r.issues.includes(w.msg))).map((x) => `<li><b>${esc(x.where)}</b>: ${esc(x.msg)}</li>`).join('')}</ul>
 </body></html>`;
-  fs.mkdirSync('dist/admin/seo', { recursive: true });
-  fs.writeFileSync('dist/admin/seo/index.html', html);
-  fs.writeFileSync('dist/admin/seo/report.json', JSON.stringify({ errors, warns, pages: rows }, null, 1));
-  console.log('[validate-cms] отчёт: dist/admin/seo/index.html');
+  fs.mkdirSync('seo-report', { recursive: true });
+  fs.writeFileSync('seo-report/index.html', html);
+  fs.writeFileSync('seo-report/report.json', JSON.stringify({ errors, warns, pages: rows }, null, 1));
+  console.log('[validate-cms] отчёт: seo-report/index.html');
 }
