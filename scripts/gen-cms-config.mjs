@@ -64,17 +64,17 @@ const seo = [
   bool('noindex', 'Закрыть от индексации (noindex)', false, { hint: 'Страница останется на сайте, но не попадёт в поиск' }),
   str('canonical', 'Canonical (адрес основной версии)', { hint: 'Только если страница дублирует другую: /catalog/pryamye-divany/' }),
 ];
-const faq = [str('faq_title', 'Заголовок блока вопросов'), list('faq', 'Вопросы и ответы (FAQ, попадают в микроразметку)', [str('q', 'Вопрос', { required: true }), txt('a', 'Ответ (40–60 слов, без ссылок)', { required: true })], { label_singular: 'Вопрос', summary: '{{fields.q}}' })];
+const faq = [str('faq_title', 'Заголовок блока вопросов'), list('faq', 'Вопросы и ответы (FAQ, попадают в микроразметку)', [str('q', 'Вопрос', { required: true }), txt('a', 'Ответ (40–60 слов, без ссылок)', { required: true })], { label_singular: 'вопрос', summary: '{{fields.q}}' })];
 const ctaBtn = (n, l) => obj(n, l, [str('label', 'Текст кнопки'), str('href', 'Ссылка (/catalog/ или #forma)'), sel('action', 'Действие вместо ссылки', [opt('callback', 'Открыть форму обратного звонка')])]);
 const pageFields = [
   str('eyebrow', 'Надзаголовок (маленькая красная строка над H1)'),
   txt('lede', 'Подзаголовок под H1 (лид)', { hint: '1–2 предложения, до 220 знаков' }),
-  list('highlights', 'Цифры под заголовком (3–4 плитки)', [str('value', 'Значение', { hint: 'Например: 8 моделей' }), str('label', 'Подпись')], { label_singular: 'Цифра', summary: '{{fields.value}} {{fields.label}}' }),
+  list('highlights', 'Цифры под заголовком (3–4 плитки)', [str('value', 'Значение', { hint: 'Например: 8 моделей' }), str('label', 'Подпись')], { label_singular: 'цифру', summary: '{{fields.value}} {{fields.label}}' }),
   obj('hero_cta', 'Кнопки под заголовком', [ctaBtn('primary', 'Главная кнопка'), ctaBtn('secondary', 'Вторая кнопка')]),
   txt('body', 'Текст страницы', { hint: DIRECTIVES }),
   ...faq,
-  list('related', 'Блок «Смотрите также»', [str('url', 'Адрес', { hint: 'Например: /catalog/divany-krovati/' }), str('title', 'Заголовок'), str('text', 'Одна строка')], { label_singular: 'Ссылка', summary: '{{fields.title}}' }),
-  list('images', 'Картинки страницы', [str('slot', 'Место', { hint: 'hero: первый экран; tile-…: плитки; inline-1: в тексте' }), img('src', 'Файл'), str('alt', 'Описание картинки (alt)', { hint: 'Что на фото, с названием модели' }), hid('query'), hid('kind')], { label_singular: 'Картинка', summary: '{{fields.slot}}' }),
+  list('related', 'Блок «Смотрите также»', [str('url', 'Адрес', { hint: 'Например: /catalog/divany-krovati/' }), str('title', 'Заголовок'), str('text', 'Одна строка')], { label_singular: 'ссылку', summary: '{{fields.title}}' }),
+  list('images', 'Картинки страницы', [str('slot', 'Место', { hint: 'hero: первый экран; tile-…: плитки; inline-1: в тексте' }), img('src', 'Файл'), str('alt', 'Описание картинки (alt)', { hint: 'Что на фото, с названием модели' }), hid('query'), hid('kind')], { label_singular: 'картинку', summary: '{{fields.slot}}' }),
 ];
 const internal = ['secondary_kws', 'assumptions', 'date_modified', 'breadcrumbs'].map(hid);
 const ruleFields = [
@@ -91,7 +91,8 @@ const config = {
     commit_messages: { create: 'Админка: создано {{collection}} «{{slug}}»', update: 'Админка: изменено {{collection}} «{{slug}}»', delete: 'Админка: удалено {{collection}} «{{slug}}»', uploadMedia: 'Админка: загружен файл {{path}}', deleteMedia: 'Админка: удалён файл {{path}}' },
   },
   site_url: SITE_URL, display_url: SITE_URL, logo: { src: SITE_URL + 'favicon.svg' },
-  media_folder: 'public/images/uploads', public_folder: '/images/uploads',
+  // все фото в одной папке с фото фабрики (WebP 600/1200 из build-images): обложки новостей, категорий и страниц тоже ссылаются на /img/p, иначе у них нет превью и фото фабрики не выбрать
+  media_folder: 'public/img/p', public_folder: '/img/p',
   // загруженные фото: имя латиницей (Тестовое Фото.jpg → testovoe-foto.webp), WebP до 1600 px прямо в браузере, до 20 МБ на файл
   media_libraries: { default: { config: { slugify_filename: true, max_file_size: 20000000, transformations: { raster_image: { format: 'webp', quality: 82, width: 1600, height: 1600 } } } } },
   slug: { encoding: 'ascii', clean_accents: true, sanitize_replacement: '-' },
@@ -121,11 +122,11 @@ const config = {
         plist('modules', 'Модули (для модульных)', str('m', 'Модуль')),
         plist('photos', 'Фото (первое будет главным)', img('p', 'Фото', { hint: 'JPG/WebP 1200–1600 px по длинной стороне' }), { collapsed: false }),
         str('alt_template', 'Шаблон alt для фото', { hint: 'Например: Прямой диван Эджио, {материал} {цвет}: подставятся выбранные ткань и цвет' }),
-        list('samples', 'Выставочные образцы (распродажа)', [REL_SHOW({ required: true }), REL_MAT('material', 'Материал'), REL_COLOR(), num('discount_pct', 'Скидка, %', { required: true, min: 1, max: 90, hint: 'Без шоурума и скидки образец на сайт не попадёт' }), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'Образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
+        list('samples', 'Выставочные образцы (распродажа)', [REL_SHOW({ required: true }), REL_MAT('material', 'Материал'), REL_COLOR(), num('discount_pct', 'Скидка, %', { required: true, min: 1, max: 90, hint: 'Без шоурума и скидки образец на сайт не попадёт' }), num('old_price', 'Цена без скидки, ₽'), num('sample_price', 'Цена образца, ₽')], { label_singular: 'образец', summary: '{{fields.showroom}} −{{fields.discount_pct}}%' }),
         txt('construction', 'Конструкция (каркас, наполнитель, опоры)'),
         ...seo,
         txt('lede', 'Подзаголовок карточки'),
-        list('features', 'Преимущества (карточки в описании)', [str('title', 'Заголовок'), txt('text', 'Пояснение')], { label_singular: 'Преимущество', summary: '{{fields.title}}' }),
+        list('features', 'Преимущества (карточки в описании)', [str('title', 'Заголовок'), txt('text', 'Пояснение')], { label_singular: 'преимущество', summary: '{{fields.title}}' }),
         txt('body', 'Описание модели', { hint: 'Вводный абзац, затем разделы «### Конструкция и материалы», «### Для какой комнаты»: они станут карточками. ' + DIRECTIVES }),
         ...faq,
         ...internal,
@@ -197,12 +198,12 @@ const config = {
           plist('payment', 'Способы оплаты', str('p', 'Способ')), num('region_limit_km', 'Доставка по области до, км'),
         ] },
         { name: 'showrooms', label: 'Шоурумы', file: 'src/cms/settings/showrooms.json', format: 'json', fields: [
-          list('showrooms', 'Шоурумы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('address', 'Адрес', { required: true }), str('hours', 'Часы работы'), str('phone', 'Телефон'), bool('is_main', 'Главный шоурум'), bool('hidden', 'Скрыть'), { name: 'lat', label: 'Широта', widget: 'number', value_type: 'float', required: false }, { name: 'lon', label: 'Долгота', widget: 'number', value_type: 'float', required: false }], { label_singular: 'Шоурум', summary: '{{fields.name}}', collapsed: false }),
+          list('showrooms', 'Шоурумы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('address', 'Адрес', { required: true }), str('hours', 'Часы работы'), str('phone', 'Телефон'), bool('is_main', 'Главный шоурум'), bool('hidden', 'Скрыть'), { name: 'lat', label: 'Широта', widget: 'number', value_type: 'float', required: false }, { name: 'lon', label: 'Долгота', widget: 'number', value_type: 'float', required: false }], { label_singular: 'шоурум', summary: '{{fields.name}}', collapsed: false }),
         ] },
         { name: 'fabrics', label: 'Ткани, цвета, механизмы', file: 'src/cms/settings/fabrics.json', format: 'json', fields: [
-          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, REL_COLOR('colors', 'Доступные цвета', { multiple: true }), str('props', 'Свойства')], { label_singular: 'Материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
-          list('colors', 'Цвета', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('plural', 'Во множественном числе («Серые»)'), { name: 'hex', label: 'Цвет кружка', widget: 'color', required: false }], { label_singular: 'Цвет', summary: '{{fields.name}}' }),
-          list('mechanisms', 'Механизмы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true })], { label_singular: 'Механизм', summary: '{{fields.name}}' }),
+          list('fabrics', 'Материалы обивки', [str('material', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('collection', 'Коллекция'), { name: 'price_k', label: 'Коэффициент цены (рогожка = 1)', widget: 'number', value_type: 'float', required: true }, REL_COLOR('colors', 'Доступные цвета', { multiple: true }), str('props', 'Свойства')], { label_singular: 'материал', summary: '{{fields.name}} ×{{fields.price_k}}' }),
+          list('colors', 'Цвета', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true }), str('plural', 'Во множественном числе (например, «Серые»)'), { name: 'hex', label: 'Цвет кружка', widget: 'color', required: false }], { label_singular: 'цвет', summary: '{{fields.name}}' }),
+          list('mechanisms', 'Механизмы', [str('slug', 'Код (латиницей)', { required: true, pattern: CODE_P, hint: 'Только латиница и дефис. Код уже используемой записи не меняйте: на него ссылаются товары' }), str('name', 'Название', { required: true })], { label_singular: 'механизм', summary: '{{fields.name}}' }),
         ] },
         { name: 'menu', label: 'Меню сайта', file: 'src/cms/settings/menu.json', format: 'json', fields: [
           list('nav', 'Меню слева от логотипа', [str('title', 'Пункт', { required: true }), str('url', 'Адрес', { required: true }), bool('accent', 'Выделить красным')], { label_singular: 'пункт', summary: '{{fields.title}}' }),

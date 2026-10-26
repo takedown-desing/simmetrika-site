@@ -36,12 +36,13 @@ jobs:
       - run: npm run qa
       - name: Save URL map, redirects and compressed photos
         run: |
-          if [ -n "$(git status --porcelain -- src/cms/settings public/images/uploads)" ]; then
+          if [ -n "$(git status --porcelain -- src/cms/settings public/images/uploads public/img/p)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -A src/cms/settings
             # папки загрузок может не быть: Sveltia убирает .gitkeep, а после удаления последнего фото папка пропадает из git
             if [ -d public/images/uploads ]; then git add -A public/images/uploads; fi
+            git add -A public/img/p
             git commit -m "Карта адресов, переадресации, сжатые фото [skip ci]"
             git pull --rebase --autostash origin main && git push origin HEAD:main || { echo "::error::карта адресов не сохранена в репозиторий"; exit 1; }
           fi

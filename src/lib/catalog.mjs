@@ -17,12 +17,13 @@ export const CATEGORY = Object.fromEntries(CAT.categories.map((c) => [c.slug, c]
 export const MECH = CAT.mechanisms;
 export const SHOWROOM = Object.fromEntries(CAT.showrooms.map((s) => [s.slug, s]));
 const IMG_BY_L = Object.fromEntries(Object.values(IMG).map((v) => [v.l, v]));
-// фото: готовые WebP фабрики (/img/p/<имя>-1200.webp + -600) или загруженные в админке файлы (/images/uploads/…)
+// фото: готовые WebP фабрики (/img/p/<имя>-1200.webp + -600) или загруженные в админке файлы (/img/p/<имя>.webp, прежние /images/uploads/…)
 export const img = (src) => {
   if (!src) return null;
   if (IMG[src]) return IMG[src];
   if (IMG_BY_L[src]) return IMG_BY_L[src];
-  if (/^\/img\/p\/.+-1200\.webp$/.test(src)) return { s: src.replace('-1200.webp', '-600.webp'), l: src, w: 1200, h: 900 };
+  // пара -600 только если файл есть: загруженное в админке «…-1200.webp» без пары иначе давало битую картинку на телефоне
+  if (/^\/img\/p\/.+-1200\.webp$/.test(src) && fs.existsSync(path.resolve('public' + src.replace('-1200.webp', '-600.webp')))) return { s: src.replace('-1200.webp', '-600.webp'), l: src, w: 1200, h: 900 };
   if (/^(\/|https?:)/.test(src)) return { s: src, l: src, w: null, h: null };
   return null;
 };

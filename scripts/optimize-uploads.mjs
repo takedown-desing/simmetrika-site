@@ -1,12 +1,10 @@
-// Сжимает фото, загруженные в админке (public/images/uploads): длинная сторона до 1600 px, JPEG/WebP качество 80.
+// Сжимает фото, загруженные в админке (папка медиатеки public/img/p; public/images/uploads — прежняя папка загрузок): длинная сторона до 1600 px, JPEG/WebP качество 80.
 // Файл перезаписывается под тем же именем, поэтому ссылки в записях не меняются. Уже сжатые (до 1600 px и до 400 КБ) не трогает.
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
-const DIR = 'public/images/uploads';
-if (!fs.existsSync(DIR)) process.exit(0);
 let n = 0;
-for (const f of fs.readdirSync(DIR)) {
+for (const DIR of ['public/images/uploads', 'public/img/p']) if (fs.existsSync(DIR)) for (const f of fs.readdirSync(DIR)) {
   const p = path.join(DIR, f);
   if (!/\.(jpe?g|png|webp)$/i.test(f) || !fs.statSync(p).isFile()) continue;
   const buf = fs.readFileSync(p);

@@ -11,9 +11,14 @@
     /* Sveltia запрещает выделение текста во всём интерфейсе; разрешаем копировать подписи, подсказки и тексты */
     body, body *:not(button):not([role="button"]):not([role="tab"]):not([draggable="true"]) { -webkit-user-select: text !important; user-select: text !important; }
     .cms-bar { position: fixed; right: 64px; bottom: 12px; z-index: 2147483000; display: flex; gap: 8px; }
-    .cms-bar a { padding: 6px 12px; border-radius: 999px; background: #c8102e; color: #fff; font: 600 13px/1.2 -apple-system, Segoe UI, Arial, sans-serif; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-    .cms-bar .pub { background: #555; } .cms-bar .pub.ok { background: #2e7d32; } .cms-bar .pub.fail { background: #b00020; }
+    .cms-bar a { padding: 6px 12px; border-radius: 999px; background: #37474f; color: #fff; font: 600 13px/1.2 -apple-system, Segoe UI, Arial, sans-serif; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+    /* красный только у «Публикация не прошла», чтобы ошибку не путали с кнопкой SEO-проверки */
+    .cms-bar .pub { background: #757575; } .cms-bar .pub.ok { background: #2e7d32; } .cms-bar .pub.fail { background: #c8102e; outline: 2px solid #fff; }
+    .cms-bar .pub.fail::before { content: '⚠ '; }
     .cms-bar .pub[hidden] { display: none; }
+    /* на телефоне у Sveltia снизу панель разделов, справа над ней круглая кнопка «Создать»: плашка публикации слева, SEO-проверка только на компьютере;
+       в открытой записи плашка прячется, иначе ложится на поля формы */
+    @media (max-width: 700px) { .cms-bar { right: auto; left: 8px; bottom: 76px; } .cms-bar a { padding: 4px 10px; font-size: 12px; } .cms-bar .seo-link { display: none; } body:has(section.field[data-key-path]) .cms-bar { display: none; } }
   </style>
   <script>
     // обычное меню браузера по правому клику («Копировать», «Вставить», «Открыть ссылку») вместо меню Sveltia
