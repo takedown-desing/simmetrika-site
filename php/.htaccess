@@ -1,0 +1,31 @@
+# SIMMETRIKA: все адреса обрабатывает index.php, существующие файлы (картинки, стили, скрипты) отдаются напрямую
+Options -Indexes
+DirectoryIndex index.php
+AddDefaultCharset utf-8
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # закрытые папки и файлы
+  RewriteRule ^(app|install|storage)(/|$) - [F,L]
+  RewriteRule ^config(\.sample)?\.php$ - [F,L]
+  RewriteRule ^admin/lib\.php$ - [F,L]
+  RewriteRule (^|/)\.(user\.ini|git|env) - [F,L]
+  # в папках с картинками и статикой скрипты не выполняются (img/up пополняется из админки)
+  RewriteRule ^(img|images|js|css)/.*\.(php\d?|phtml|phar|pl|py|cgi|sh)$ - [F,L,NC]
+  # существующие файлы и папка админки
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !^/?$
+  RewriteRule ^ - [L]
+  RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>

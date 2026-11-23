@@ -1,5 +1,6 @@
 (() => {
   const BASE = document.body.dataset.base || '';
+  const API = document.body.dataset.leadApi || '';
   const KEY = 'simmetrika_lead_v1';
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -56,12 +57,27 @@
     if (msg) { if (err) err.textContent = msg; return; }
     phone?.removeAttribute('aria-invalid'); if (err) err.textContent = '';
     const type = f.dataset.form;
-    const lead = { no: leadNo(), type, data: Object.fromEntries(new FormData(f)), items: type === 'cart' ? load() : f._items || [], source: location.pathname, utm: utm(), at: new Date().toISOString() };
-    try { const log = JSON.parse(localStorage.getItem('simmetrika_leads') || '[]'); log.push(lead); localStorage.setItem('simmetrika_leads', JSON.stringify(log.slice(-20))); } catch {}
-    try { window.ym && window.ym(0, 'reachGoal', 'lead_' + type); } catch {}
-    if (type === 'cart' || type === 'one_click') { if (type === 'cart') save([]); try { sessionStorage.setItem('simmetrika_last_lead', lead.no); } catch {} location.href = BASE + '/zayavka/spasibo/?id=' + encodeURIComponent(lead.no); return; }
-    $$('input, textarea, select, button', f).forEach((x) => (x.disabled = true));
-    const ok = $('[data-ok]', f); if (ok) ok.hidden = false;
+    const lead = { no: '', type, data: Object.fromEntries(new FormData(f)), items: type === 'cart' ? load() : f._items || [], source: location.pathname, utm: utm(), at: new Date().toISOString() };
+    if (lead.data.consent) lead.data.consent = true;
+    const btn = $('button[type=submit]', f);
+    if (f._busy) return; f._busy = true; if (btn) btn.disabled = true;
+    // на хостинге (PHP) заявка уходит на сервер; в статичной копии без сервера номер выдаётся в браузере
+    const send = API
+      ? fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lead) })
+          .then((r) => r.json().catch(() => ({})).then((j) => { if (!r.ok || !j.ok) throw new Error(j.error || ''); return j.no; }))
+      : Promise.resolve(leadNo());
+    send.then((no) => {
+      lead.no = no;
+      try { const log = JSON.parse(localStorage.getItem('simmetrika_leads') || '[]'); log.push(lead); localStorage.setItem('simmetrika_leads', JSON.stringify(log.slice(-20))); } catch {}
+      try { window.ym && window.ym(0, 'reachGoal', 'lead_' + type); } catch {}
+      if (type === 'cart' || type === 'one_click') { if (type === 'cart') save([]); try { sessionStorage.setItem('simmetrika_last_lead', lead.no); } catch {} location.href = BASE + '/zayavka/spasibo/?id=' + encodeURIComponent(lead.no); return; }
+      $$('input, textarea, select, button', f).forEach((x) => (x.disabled = true));
+      const ok = $('[data-ok]', f); if (ok) ok.hidden = false;
+    }).catch((x) => {
+      f._busy = false; if (btn) btn.disabled = false;
+      const tel = $('a[href^="tel:"]')?.textContent.trim() || '';
+      if (err) err.textContent = (x && x.message ? x.message + ' ' : 'Не удалось отправить заявку. ') + (tel ? 'Позвоните нам: ' + tel + '.' : 'Попробуйте ещё раз.');
+    });
   });
 
   // ── modal (callback / one click) ──
@@ -169,5 +185,14 @@
     draw();
   }
   const th = $('[data-thanks]');
-  if (th) { const id = new URLSearchParams(location.search).get('id'); if (!id) location.replace(BASE + '/catalog/'); else $('[data-lead-no]').textContent = id; }
+  if (th) {
+    const id = new URLSearchParams(location.search).get('id');
+    if (!id) location.replace(BASE + '/catalog/');
+    else {
+      $('[data-lead-no]').textContent = id;
+      // в текстах страницы из админки номер обозначен как {number}
+      $$('main h1, main .lede, main p').forEach((el) => { if (el.textContent.includes('{number}')) el.textContent = el.textContent.split('{number}').join(id); });
+      document.title = document.title.split('{number}').join(id);
+    }
+  }
 })();

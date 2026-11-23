@@ -6,3 +6,5 @@ qa-report.md
 public/admin/config.yml
 links-report.md
 seo-report/
+build/
+php/config.php
